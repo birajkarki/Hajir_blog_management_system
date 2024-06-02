@@ -11,6 +11,14 @@ const Blog = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    blogDescription: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    blogImage: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     status: {
       type: DataTypes.ENUM,
       values: ["draft", "approved", "rejected"],

@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.use(verifyTemplate, verifyCategory, verifySubcategory)
 
-router.route("/").get(getAllBlogs).post(upload.array("images", 5), createBlog);
+router.route("/").get(getAllBlogs).post(upload.array("images", 6), createBlog);
 router
   .route("/:id")
   .get(getBlogID)

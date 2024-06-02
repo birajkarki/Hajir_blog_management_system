@@ -7,15 +7,22 @@ export const createBlog = CatchAsync(async (req, res) => {
     blogName: req.body.blogName,
     ...req.obj,
     status: "draft",
+    blogDescription: req.body.blogDescription,
+    blogImage: `localhost:3000/${req.files[0].filename}`,
     sections: req.body.sections,
   };
-  const sectionsData = JSON.parse(blog.sections).map((value, i) => {
-    const { name, text } = value;
-    const image = `localhost:8000/${req.files[i].filename}`;
-    const id = i + 1;
-    return { id, name, text, image };
+  const sections = JSON.parse(blog.sections);
+  // console.log(sections);
+  const sectionsData = sections.map((value, i) => {
+    if (i !== sections.length) {
+      const { name, text } = value;
+      const image = `localhost:3000/${req.files[i + 1].filename}`;
+      const id = i + 1;
+      return { id, name, text, image };
+    }
   });
   blog.sections = sectionsData;
+  console.log(blog);
   const _blog = await Blog.create(blog);
   res.status(201).json({
     success: true,
