@@ -1,5 +1,4 @@
 import Blog from "../models/blog.model.js";
-import Section from "../models/section.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 
@@ -25,7 +24,7 @@ export const createBlog = CatchAsync(async (req, res) => {
   });
 });
 
-export const getAllBlog = CatchAsync(async (req, res) => {
+export const getAllBlogs = CatchAsync(async (req, res) => {
   const categoryId = req.category;
   const templateId = req.template;
   const subcategoryId = req.subcategory;

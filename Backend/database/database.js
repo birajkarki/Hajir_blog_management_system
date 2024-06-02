@@ -11,7 +11,7 @@ export const connectToDb = async () => {
     await sequelize.authenticate();
     console.log("Database connected ...");
   
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
     console.log("Database schema updated");
   } catch (error) {
     console.error("Unable to connect to the database:", error);
