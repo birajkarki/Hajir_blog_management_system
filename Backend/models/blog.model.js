@@ -11,12 +11,18 @@ const Blog = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.ENUM,
+      values: ["draft", "approved", "rejected"],
+      allowNull: false,
+    },
     templateId: {
       type: DataTypes.INTEGER,
       references: {
         model: Template,
         key: "id",
       },
+      onDelete: "CASCADE",
     },
     categoryId: {
       type: DataTypes.INTEGER,
@@ -24,6 +30,7 @@ const Blog = sequelize.define(
         model: Category,
         key: "id",
       },
+      onDelete: "CASCADE",
     },
     subcategoryId: {
       type: DataTypes.INTEGER,
