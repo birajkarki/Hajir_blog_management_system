@@ -45,7 +45,7 @@ const CreateBlogForm = ({ selectedTemplateId, selectedCategoryId, selectedSubCat
 
     try {
       const res = await ApiRequest.post(`/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`, formData);
-      console.log(res.data);
+      // console.log(res.data);
       onCreateSuccess()
       toast.success("Blog Created Successfully")
     } catch (error) {

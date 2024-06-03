@@ -3,13 +3,13 @@ import ApiRequest from "../utils/apiRequest";
 import { FiDelete } from "react-icons/fi";
 import { RxUpdate } from "react-icons/rx";
 import CreateBlogForm from "./CreateBlogForm";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import UpdateBlogForm from "./UpdateBlogForm";
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedBlog, setSelectedBlog] = useState(null);
   const [showCreateBlog, setShowCreateBlog] = useState(false);
   const [showUpdateBlog, setShowUpdateBlog] = useState(false);
 
@@ -19,10 +19,11 @@ const Blog = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
+  const [showTemplates, setShowTemplates] = useState(null);
   const [showCategories, setShowCategories] = useState(false);
   const [showSubCategories, setShowSubCategories] = useState(false);
-
-  console.log("blogs", blogs);
+  const [showBlog, setShowBlog] = useState(false);
+  const [updateBlogId, setUpdateBlogId] = useState(null);
 
   // -------------------------- Fetch Templates  -------------------------------------------
   useEffect(() => {
@@ -37,6 +38,7 @@ const Blog = () => {
     };
 
     fetchTemplates();
+    setShowTemplates(true);
   }, []);
 
   // -------------------------- Fetch All Blogs  -------------------------------------------
@@ -95,10 +97,7 @@ const Blog = () => {
       const selectedCategory = categories.find(
         (c) => c.id === parseInt(selectedCategoryId)
       );
-      // console.log("Selected Category Id", selectedCategoryId)
-      // console.log("Selected Category", selectedCategory)
       setSubCategories(selectedCategory ? selectedCategory.SubCategories : []);
-      console.log("selected sub categories", selectedCategory.subCategories);
       setShowSubCategories(true);
     } else {
       setShowSubCategories(false);
@@ -126,15 +125,13 @@ const Blog = () => {
   const handleShowCreateBlog = () => setShowCreateBlog(!showCreateBlog);
 
   const handleDeleteBlog = async (blog) => {
-    setSelectedBlog(blog);
     try {
       await ApiRequest.delete(
         `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blog.id}`
       );
-      console.log("Blog deleted");
+
       toast.success("Blog Deleted Successfully");
       fetchAllBlogs();
-      console.log("Blog fetched");
     } catch (error) {
       console.error("Failed to delete blog:", error);
     }
@@ -143,6 +140,14 @@ const Blog = () => {
   const handleCreateSuccess = () => {
     setShowCreateBlog(false);
     fetchAllBlogs();
+  };
+
+  const handleUpdateBlog = (blog) => {
+    setUpdateBlogId(blog.id);
+    setShowUpdateBlog(true);
+  };
+  const handleBlogShow = () => {
+    setShowBlog(!showBlog);
   };
 
   if (loading) {
@@ -176,7 +181,7 @@ const Blog = () => {
 
       {/* -----------------------  Show Template ----------------------------------- */}
       <div className="rounded-lg p-6 mb-6">
-        {!showCreateBlog && !showUpdateBlog && (
+        {!showCreateBlog && !showUpdateBlog && showTemplates && (
           <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
             {templates.map((item) => (
               <li
@@ -238,11 +243,20 @@ const Blog = () => {
 
       {showCreateBlog && (
         <CreateBlogForm
-          onSuccess={handleCreateSuccess}
           selectedTemplateId={selectedTemplateId}
           selectedCategoryId={selectedCategoryId}
           selectedSubCategoryId={selectedSubCategoryId}
           onCreateSuccess={handleCreateSuccess}
+        />
+      )}
+
+      {showUpdateBlog && (
+        <UpdateBlogForm
+          onCreateSuccess={handleCreateSuccess}
+          selectedTemplateId={selectedTemplateId}
+          selectedCategoryId={selectedCategoryId}
+          selectedSubCategoryId={selectedSubCategoryId}
+          blogId={updateBlogId}
         />
       )}
 
@@ -257,13 +271,16 @@ const Blog = () => {
                   key={blog.id}
                   className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer"
                 >
-                  <div className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white">
+                  <div
+                    className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white"
+                    onClick={handleBlogShow}
+                  >
                     <h2>{blog.blogName}</h2>
                   </div>
                   <div className="flex justify-between items-center p-4 bg-gray-100">
                     <button
                       className="text-purple-600 hover:text-purple-800 transition duration-300"
-                      onClick={() => setShowUpdateBlog(true)}
+                      onClick={() => handleUpdateBlog(blog)}
                     >
                       <RxUpdate size={24} />
                     </button>
@@ -280,6 +297,12 @@ const Blog = () => {
           ) : (
             <p className="text-center col-span-full">No blogs available</p>
           )}
+
+          {/* {showBlog && (
+            <div>
+              <div>Hello</div>
+            </div>
+          )} */}
         </div>
       )}
     </div>
