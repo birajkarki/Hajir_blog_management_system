@@ -19,7 +19,16 @@ const router = express.Router();
 
 router.use(verifyTemplate, verifyCategory, verifySubcategory);
 
-router.route("/").get(getAllBlogs).post(upload.array("images", 6), createBlog);
+router
+  .route("/")
+  .get(getAllBlogs)
+  .post(
+    upload.fields([
+      { name: "blogImage", maxCount: 1 },
+      { name: "sectionImages", maxCount: 5 },
+    ]),
+    createBlog
+  );
 router
   .route("/:id")
   .get(getBlogID)

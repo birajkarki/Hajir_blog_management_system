@@ -92,16 +92,7 @@ const Homepage = () => {
               >
                 Template
               </li>
-              <li
-                className={` transition-colors cursor-pointer rounded-md duration-100 ${
-                  selectOption === "Blog"
-                    ? "bg-purple-600 text-white py-2 px-4 "
-                    : ""
-                }`}
-                onClick={handleShowBlog}
-              >
-                Blog
-              </li>
+              
               <li
                 className={` transition-colors cursor-pointer rounded-md duration-100 ${
                   selectOption === "Category"
@@ -121,6 +112,16 @@ const Homepage = () => {
                 onClick={handleShowSubCategory}
               >
                 Sub Category
+              </li>
+              <li
+                className={` transition-colors cursor-pointer rounded-md duration-100 ${
+                  selectOption === "Blog"
+                    ? "bg-purple-600 text-white py-2 px-4 "
+                    : ""
+                }`}
+                onClick={handleShowBlog}
+              >
+                Blog
               </li>
             </ul>
             <div className='mt-10'>

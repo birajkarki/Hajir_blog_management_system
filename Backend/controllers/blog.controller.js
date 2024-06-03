@@ -2,34 +2,40 @@ import Blog from "../models/blog.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 
-export const createBlog = CatchAsync(async (req, res) => {
+
+export const createBlog = CatchAsync(async (req, res, next) => {
+  const { blogName, blogDescription, sections } = req.body;
+  const blogImage = req.files.blogImage ? `localhost:3000/${req.files.blogImage[0].filename}` : null;
+  const parsedSections = JSON.parse(sections);
+
+  if (!parsedSections) {
+    return next(new AppError("Section not found!", 404));
+  }
+
+  const sectionsData = parsedSections.map((value, i) => {
+    const { name, text } = value;
+    const image = req.files.sectionImages && req.files.sectionImages[i] ? `localhost:3000/${req.files.sectionImages[i].filename}` : null;
+    const id = i + 1;
+    return { id, name, text, image };
+  });
+
   const blog = {
-    blogName: req.body.blogName,
+    blogName,
     ...req.obj,
     status: "draft",
-    blogDescription: req.body.blogDescription,
-    blogImage: `localhost:3000/${req.files[0].filename}`,
-    sections: req.body.sections,
+    blogDescription,
+    blogImage,
+    sections: sectionsData,
   };
-  const sections = JSON.parse(blog.sections);
-  // console.log(sections);
-  const sectionsData = sections.map((value, i) => {
-    if (i !== sections.length) {
-      const { name, text } = value;
-      const image = `localhost:3000/${req.files[i + 1].filename}`;
-      const id = i + 1;
-      return { id, name, text, image };
-    }
-  });
-  blog.sections = sectionsData;
-  console.log(blog);
+
   const _blog = await Blog.create(blog);
   res.status(201).json({
-    status: "success",
+    success: true,
     message: "Blog Created Successfully",
-    _blog,
+    blog: _blog,
   });
 });
+
 
 export const getAllBlogs = CatchAsync(async (req, res) => {
   const categoryId = req.category;
@@ -106,10 +112,11 @@ export const updateBlog = CatchAsync(async (req, res) => {
   }
 
   existingBlog.sections = sectionData ? sectionData : existingBlog.sections;
+  const newBlog = await existingBlog.save();
   res.json({
     status: "success",
     message: "Blog updated successfully",
-    existingBlog,
+    newBlog,
   });
 });
 

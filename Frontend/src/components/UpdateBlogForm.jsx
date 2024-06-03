@@ -8,12 +8,11 @@ const UpdateBlogForm = ({
   selectedCategoryId,
   selectedSubCategoryId,
   onCreateSuccess,
+  handleCancel
 }) => {
   const [blogName, setBlogName] = useState("");
   const [blogDescription, setBlogDescription] = useState("");
-  const [sections, setSections] = useState([
-    { id: null, name: "", text: "", image: null },
-  ]);
+  const [sections, setSections] = useState([]);
   const [blogImage, setBlogImage] = useState(null);
   const [sectionImages, setSectionImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,10 +25,11 @@ const UpdateBlogForm = ({
         );
         console.log(response);
         const { blogName, blogDescription, sections } = response.data.result;
-        console.log("response data",response.data);
-        // setBlogName(blogName);
-        // setBlogDescription(blogDescription);
-        // setSections(sections);
+        // console.log("response data", response.data);
+        setBlogName(blogName);
+        setBlogDescription(blogDescription);
+        setSections(Array.isArray(sections) ? sections : []);
+        setSectionImages(new Array(sections ? sections.length : 0).fill(null));
       } catch (error) {
         console.error("Error fetching blog data:", error);
         toast.error("Error fetching blog data");
@@ -37,7 +37,7 @@ const UpdateBlogForm = ({
     };
 
     fetchBlogData();
-  }, [blogId]);
+  }, [blogId, selectedTemplateId, selectedCategoryId, selectedSubCategoryId]);
 
   const handleSectionChange = (index, key, value) => {
     const updatedSections = [...sections];
@@ -53,13 +53,20 @@ const UpdateBlogForm = ({
   };
 
   const handleAddSection = () => {
-    setSections([...sections, { id: null, name: "", text: "", image: null }]);
+    if (sections.length < 5) {
+        setSections([...sections, { name: "", text: "" }]);
+        setSectionImages([...sectionImages, null]);
+      }
   };
 
   const handleRemoveSection = (index) => {
     const updatedSections = [...sections];
     updatedSections.splice(index, 1);
     setSections(updatedSections);
+
+    const updatedSectionImages = [...sectionImages];
+    updatedSectionImages.splice(index, 1);
+    setSectionImages(updatedSectionImages);
   };
 
   const handleBlogImageChange = (e) => {
@@ -84,8 +91,11 @@ const UpdateBlogForm = ({
     });
 
     try {
-      const res = await ApiRequest.put(`/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`, formData);
-      console.log(res.data);
+        console.log(formData);
+      const res = await ApiRequest.put(
+        `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`,
+        formData
+      );
       onCreateSuccess();
       toast.success("Blog Updated Successfully");
     } catch (error) {
@@ -96,9 +106,16 @@ const UpdateBlogForm = ({
     }
   };
 
+  const handleCancelUpdate = () => {
+    handleCancel();
+  }
+
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Update Blog</h2>
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
+      <div className="flex flex-row justify-between mb-4">
+        <h2 className="text-2xl font-bold mb-4">Update Blog</h2>
+        <button onClick={handleCancelUpdate} className='bg-red-600 p-3 rounded-md text-white'>Cancel</button>
+      </div>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -114,43 +131,44 @@ const UpdateBlogForm = ({
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
         <input type="file" onChange={handleBlogImageChange} className="mb-4" />
-        {sections.map((section, index) => (
-          <div key={index} className="mb-4">
-            <input
-              type="text"
-              value={section.name}
-              onChange={(e) =>
-                handleSectionChange(index, "name", e.target.value)
-              }
-              placeholder={`Section ${index + 1} Name`}
-              className="w-full px-4 py-2 mb-2 border rounded-md"
-            />
-            <textarea
-              value={section.text}
-              onChange={(e) =>
-                handleSectionChange(index, "text", e.target.value)
-              }
-              placeholder={`Section ${index + 1} Text`}
-              className="w-full px-4 py-2 mb-2 border rounded-md"
-            />
-            <input
-              type="file"
-              onChange={(e) => handleSectionImageChange(index, e)}
-              className="mb-2"
-            />
-            <button
-              type="button"
-              onClick={() => handleRemoveSection(index)}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-            >
-              Remove Section
-            </button>
-          </div>
-        ))}
+        {Array.isArray(sections) &&
+          sections.map((section, index) => (
+            <div key={index} className="mb-4">
+              <input
+                type="text"
+                value={section.name}
+                onChange={(e) =>
+                  handleSectionChange(index, "name", e.target.value)
+                }
+                placeholder={`Section ${index + 1} Name`}
+                className="w-full px-4 py-2 mb-2 border rounded-md"
+              />
+              <textarea
+                value={section.text}
+                onChange={(e) =>
+                  handleSectionChange(index, "text", e.target.value)
+                }
+                placeholder={`Section ${index + 1} Text`}
+                className="w-full px-4 py-2 mb-2 border rounded-md"
+              />
+              <input
+                type="file"
+                onChange={(e) => handleSectionImageChange(index, e)}
+                className="mb-2"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveSection(index)}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Remove Section
+              </button>
+            </div>
+          ))}
         <button
           type="button"
           onClick={handleAddSection}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4 mr-5"
         >
           Add Section
         </button>
