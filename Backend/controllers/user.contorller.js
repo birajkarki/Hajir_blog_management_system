@@ -8,7 +8,7 @@ import crypto from "crypto";
 import { Op } from "sequelize";
 
 export const registerUser = CatchAsync(async (req, res, next) => {
-  const { username, email, password, roles } = req.body;
+  const { username, email, password } = req.body;
 
   // console.log(username, email, password);
 

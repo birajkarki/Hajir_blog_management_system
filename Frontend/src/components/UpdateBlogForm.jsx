@@ -25,11 +25,11 @@ const UpdateBlogForm = ({
           `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`
         );
         console.log(response);
-        const { blogName, blogDescription, sections } = response.data;
+        const { blogName, blogDescription, sections } = response.data.result;
+        console.log("response data",response.data);
         // setBlogName(blogName);
         // setBlogDescription(blogDescription);
         // setSections(sections);
-        console.log(blogName, blogDescription, sections)
       } catch (error) {
         console.error("Error fetching blog data:", error);
         toast.error("Error fetching blog data");
