@@ -16,7 +16,7 @@ const app = express();
 // MIDDLEWARES
     app.use(
         cors({
-          origin: ["http://localhost:5173","https://backendhajir-blogmanagement.onrender.com","http://localhost:3000"],
+          origin: ["http://localhost:5173"],
           methods: ["GET", "POST", "DELETE", "PUT"],
           credentials: true,
         })
@@ -32,7 +32,7 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/template", templateRoute);
 app.use("/api/v1/:templateId/category", extractObj, categoryRoute);
 app.use(
-  "/api/v1/:templateId/:categoryId/subcategory",
+  "/api/v1/:templateId/:categoryId/subcategory/",
   extractObj,
   subCategoryRoute
 );

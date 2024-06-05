@@ -1,33 +1,43 @@
 import Blog from "../models/blog.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
+import cloudinary from "cloudinary";
 
-
-export const createBlog = CatchAsync(async (req, res, next) => {
-  const { blogName, blogDescription, sections } = req.body;
-  const blogImage = req.files.blogImage ? `localhost:3000/${req.files.blogImage[0].filename}` : null;
-  const parsedSections = JSON.parse(sections);
-
-  if (!parsedSections) {
+export const createBlog = CatchAsync(async (req, res) => {
+  const blogImageUpload = await cloudinary.uploader.upload(
+    req.files.blogImage[0].path
+  );
+  const blogImageUrl = blogImageUpload.secure_url;
+  const sectionImageUploads = await Promise.all(
+    req.files.sectionImages.map((file) => cloudinary.uploader.upload(file.path))
+  );
+  const sectionImageUrls = sectionImageUploads.map(
+    (upload) => upload.secure_url
+  );
+  const blog = {
+    blogName: req.body.blogName,
+    ...req.obj,
+    status: "draft",
+    blogDescription: req.body.blogDescription,
+    blogImage: blogImageUrl,
+    sections: req.body.sections,
+  };
+  const sections = JSON.parse(blog.sections);
+  // console.log(sections);
+  if (!sections) {
     return next(new AppError("Section not found!", 404));
   }
 
-  const sectionsData = parsedSections.map((value, i) => {
-    const { name, text } = value;
-    const image = req.files.sectionImages && req.files.sectionImages[i] ? `localhost:3000/${req.files.sectionImages[i].filename}` : null;
-    const id = i + 1;
-    return { id, name, text, image };
+  const sectionsData = sections.map((value, i) => {
+    if (i !== sections.length) {
+      const { name, text } = value;
+      const image = sectionImageUrls[i];
+      const id = i + 1;
+      return { id, name, text, image };
+    }
   });
-
-  const blog = {
-    blogName,
-    ...req.obj,
-    status: "draft",
-    blogDescription,
-    blogImage,
-    sections: sectionsData,
-  };
-
+  blog.sections = sectionsData;
+  console.log(blog);
   const _blog = await Blog.create(blog);
   res.status(201).json({
     success: true,
@@ -35,7 +45,6 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     blog: _blog,
   });
 });
-
 
 export const getAllBlogs = CatchAsync(async (req, res) => {
   const categoryId = req.category;
@@ -48,7 +57,7 @@ export const getAllBlogs = CatchAsync(async (req, res) => {
     return next(new AppError("Blog not Found with that ID!", 404));
   }
   res.status(200).json({
-    status: "success",
+    success: true,
     message: "blogs read successfully",
     blogs: blogs,
   });
@@ -66,7 +75,7 @@ export const getBlogID = CatchAsync(async (req, res) => {
     return next(new AppError("Blog not Found with that ID!", 404));
   }
   res.status(200).json({
-    status: "success",
+    success: true,
     message: "blog found successfully ",
     result: blog,
   });
@@ -76,8 +85,13 @@ export const updateBlog = CatchAsync(async (req, res) => {
   const blogId = req.params.id;
   const existingBlog = await Blog.findByPk(blogId);
   if (!existingBlog) {
-    return next(new AppError("Blog not found!",404))
+    return res.json({
+      success: false,
+      message: "Blog not found",
+    });
   }
+  // console.log(existingBlog.sections);
+  // console.log(req.files.sectionImages);
   existingBlog.blogName = req.body.blogName
     ? req.body.blogName
     : existingBlog.blogName;
@@ -88,6 +102,7 @@ export const updateBlog = CatchAsync(async (req, res) => {
     ? `localhost:3000/${req.files.blogImage[0].filename}`
     : existingBlog.blogImage;
   let sectionData;
+  // console.log(req.body.sections);
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
     sectionData = JSON.parse(existingBlog.sections).map((section, i) => {
@@ -112,14 +127,40 @@ export const updateBlog = CatchAsync(async (req, res) => {
   }
 
   existingBlog.sections = sectionData ? sectionData : existingBlog.sections;
-  const newBlog = await existingBlog.save();
+  // console.log(existingBlog.blogImage);
+  // console.log(existingBlog.sections);
+  // console.log(existingBlog);
+  // const newBlog = await existingBlog.save();
   res.json({
-    status: "success",
+    success: true,
     message: "Blog updated successfully",
-    newBlog,
+    // newBlog,
+    existingBlog,
   });
 });
 
+export const deleteSection = CatchAsync(async (req, res) => {
+  const blogId = req.params.id;
+
+  const existingBlog = await Blog.findByPk(blogId);
+  if (!existingBlog) {
+    return next(new AppError("Blog not Found with that ID!", 404));
+  }
+  const { idToDelete } = req.body;
+  const sections = JSON.parse(existingBlog.sections);
+  if (!idToDelete) {
+    return next(new AppError("No id found!", 404));
+  }
+  sections.splice(idToDelete - 1, 1);
+  // console.log(sections);
+  existingBlog.sections = sections;
+  const newBlog = await existingBlog.save();
+  res.json({
+    success: true,
+    message: "Section deleted Successfully",
+    newBlog,
+  });
+});
 
 export const deleteBlog = CatchAsync(async (req, res) => {
   const blog = await Blog.findByPk(req.params.id);
@@ -145,7 +186,7 @@ export const approveBlog = CatchAsync(async (req, res) => {
   blog.status = "approved";
   await blog.save();
   res.status(200).json({
-    status: "success",
+    success: true,
     message: "Blog approved successfully",
     blog,
   });
@@ -160,7 +201,7 @@ export const rejectBlog = CatchAsync(async (req, res) => {
 
   await blog.save();
   res.status(200).json({
-    status: "success",
+    success: true,
     message: "Blog rejected successfully",
     blog,
   });

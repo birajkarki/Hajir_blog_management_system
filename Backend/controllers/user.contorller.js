@@ -8,7 +8,7 @@ import crypto from "crypto";
 import { Op } from "sequelize";
 
 export const registerUser = CatchAsync(async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, roles } = req.body;
 
   // console.log(username, email, password);
 
@@ -19,7 +19,12 @@ export const registerUser = CatchAsync(async (req, res, next) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   // console.log(hashedPassword);
-  let user = await User.create({ username, email, password: hashedPassword });
+  let user = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+    roles,
+  });
   // console.log(user);
 
   createSendToken(user, "User Registered Successfully", 201, res);
@@ -113,7 +118,8 @@ export const getAllUser = CatchAsync(async (req, res, next) => {
 });
 
 export const deleteUser = CatchAsync(async (req, res, next) => {
-  const { id } = req.params;
+  const id = req.params.id;
+  console.log(req.params.id);
   await User.destroy({ where: { id } });
 
   res.status(200).json({

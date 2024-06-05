@@ -3,7 +3,7 @@ import path from "path";
 import AppError from "../utils/AppError.js";
 
 let limit = {
-  fileSize: 1024 * 1024 * 3, //2Mb
+  fileSize: 1024 * 5, //5KB
 };
 
 let storage = multer.diskStorage({
@@ -22,15 +22,13 @@ let storage = multer.diskStorage({
 let fileFilter = (req, file, cb) => {
   let validExtensions = [
     ".jpeg",
-    ".jpg",
-    ".JPG",
     ".JPEG",
     ".png",
-    ".svg",
-    ".doc",
-    ".pdf",
-    ".mp4",
     ".PNG",
+    ".WebP",
+    ".WEBP",
+    ".jpg",
+    ".JPG",
   ];
 
   let originalName = file.originalname;

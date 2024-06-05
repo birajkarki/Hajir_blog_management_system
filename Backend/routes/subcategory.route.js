@@ -7,16 +7,17 @@ import {
   getAllSubCategory,
 } from "../controllers/subcategory.controller.js";
 import { verifyCategory, verifyTemplate } from '../middlewares/verification.js';
+import protect from "../middlewares/protect.js";
 
 const router = express.Router();
 
 router.use(verifyTemplate, verifyCategory);
 
-router.route("/").get(getAllSubCategory).post(createSubCategory);
+router.route("/").get(getAllSubCategory).post(protect,createSubCategory);
 router
   .route("/:id")
   .get(getSubCategoryID)
-  .put(updateSubCategory)
-  .delete(deleteSubCategory);
+  .put(protect,updateSubCategory)
+  .delete(protect,deleteSubCategory);
 
 export default router;
