@@ -11,21 +11,22 @@ import { Context } from "./context/Context";
 import ApiRequest from "./utils/apiRequest";
 
 const App = () => {
-  // const { isAuthenticated, setIsAuthenticated, setUser } = useContext(Context);
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const res = await ApiRequest.get("/user/me");
-  //       setIsAuthenticated(true);
-  //       setUser(res.data.user);
-  //     } catch (err) {
-  //       setIsAuthenticated(false);
-  //       setUser({});
-  //     }
-  //   };
+  const { isAuthenticated, setIsAuthenticated, setUser } = useContext(Context);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await ApiRequest.get("/user/me");
+        console.log(res);
+        setIsAuthenticated(true);
+        setUser(res.data.user);
+      } catch (err) {
+        setIsAuthenticated(false);
+        setUser({});
+      }
+    };
 
-  //   fetchUser();
-  // }, [isAuthenticated]);
+    fetchUser();
+  }, [isAuthenticated]);
   return (
     <Router>
       <Routes>
