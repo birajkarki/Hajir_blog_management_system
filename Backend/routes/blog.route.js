@@ -3,6 +3,7 @@ import {
   approveBlog,
   createBlog,
   deleteBlog,
+  deleteSection,
   getAllBlogs,
   getBlogID,
   rejectBlog,
@@ -14,15 +15,18 @@ import {
   verifySubcategory,
   verifyTemplate,
 } from "../middlewares/verification.js";
+import protect from "../middlewares/protect.js";
+import { checkRole } from "../middlewares/checkRole.js";
 
 const router = express.Router();
 
-router.use(verifyTemplate, verifyCategory, verifySubcategory);
+router.use(verifyTemplate, verifySubcategory);
 
 router
   .route("/")
   .get(getAllBlogs)
   .post(
+    protect,
     upload.fields([
       { name: "blogImage", maxCount: 1 },
       { name: "sectionImages", maxCount: 5 },
@@ -32,7 +36,8 @@ router
 router
   .route("/:id")
   .get(getBlogID)
-  .put(
+  .patch(
+    protect,
     upload.fields([
       { name: "blogImage", maxCount: 1 },
       { name: "sectionImages", maxCount: 5 },
@@ -40,7 +45,7 @@ router
     updateBlog
   )
   .delete(deleteBlog);
-router.route("approve/:id").put(approveBlog);
-router.route("reject/:id").put(rejectBlog);
-
+router.route("/section/:id").delete(protect, deleteSection);
+router.route("/approve/:id").put(protect, checkRole, approveBlog);
+router.route("/reject/:id").put(protect, checkRole, rejectBlog);
 export default router;

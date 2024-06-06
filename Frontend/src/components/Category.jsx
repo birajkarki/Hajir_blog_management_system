@@ -17,11 +17,8 @@ const Category = () => {
 
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
 
-
-
   useEffect(() => {
-     getTemplate();
-    
+    getTemplate();
   }, []);
 
   useEffect(() => {
@@ -38,7 +35,6 @@ const Category = () => {
     try {
       setLoading(true);
       const res = await ApiRequest.get(`/${selectTemplate}/category`);
-      // console.log(res);
       setCategory(res.data.categories);
       setLoading(false);
     } catch (error) {
@@ -60,7 +56,6 @@ const Category = () => {
   };
 
   const handleShowCreateCategory = () => {
-    
     setShowCreateCategory(!showCreateCategory);
     setShowUpdateCategory(false);
   };
@@ -76,12 +71,9 @@ const Category = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const newCategory = await ApiRequest.post(
-        `/${selectTemplate}/category`,
-        {
-          categoryName,
-        }
-      );
+      const newCategory = await ApiRequest.post(`/${selectTemplate}/category`, {
+        categoryName,
+      });
       setShowCreateCategory(false);
       setCategoryName("");
       setSelectedTemplateId(null);
@@ -156,20 +148,6 @@ const Category = () => {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
-            {/* <select
-              value={selectedTemplateId || ""}
-              onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="mb-4 px-4 py-2 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="" selected>
-                Select a Template
-              </option>
-              {template.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.templateName}
-                </option>
-              ))}
-            </select> */}
             <button
               type="submit"
               className="bg-green-500 text-white py-2 px-6 rounded-full hover:bg-green-600 transition duration-300"
@@ -217,7 +195,7 @@ const Category = () => {
             <h1 className="flex justify-between items-center font-bold text-3xl">Loading...</h1>
           ) : (
             <div>
-              <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
+              <ul className="flex flex-wrap justify-center gap-4 border-4 rounded-full w-full max-w-4xl mx-auto mb-5 px-5 py-2">
                 {template.map((item) => (
                   <li
                     key={item.id}
@@ -237,7 +215,7 @@ const Category = () => {
                 {category.map((category) => (
                   <div
                     key={category.id}
-                    className="bg-white shadow-md rounded-lg overflow-hidden"
+                    className="bg-white shadow-md rounded-lg overflow-hidden transition duration-300 transform hover:scale-105"
                   >
                     <div className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white">
                       {category.categoryName}

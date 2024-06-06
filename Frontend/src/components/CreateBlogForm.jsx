@@ -10,6 +10,10 @@ const CreateBlogForm = ({
 }) => {
   const [blogName, setBlogName] = useState("");
   const [blogDescription, setBlogDescription] = useState("");
+  const [blogTitle, setBlogTitle] = useState("");
+  const [titleDescription, setTitleDescription] = useState("");
+  const [slug, setSlug] = useState("");
+
   const [blogImage, setBlogImage] = useState(null);
   const [sections, setSections] = useState([{ name: "", text: "" }]);
   const [sectionImages, setSectionImages] = useState([]);
@@ -57,6 +61,9 @@ const CreateBlogForm = ({
     const formData = new FormData();
     formData.append("blogName", blogName);
     formData.append("blogDescription", blogDescription);
+    formData.append("blogTitle", blogTitle);
+    formData.append("titleDescription", titleDescription);
+    formData.append("slug", slug);
     formData.append("sections", JSON.stringify(sections));
     if (blogImage) {
       formData.append("blogImage", blogImage);
@@ -67,8 +74,8 @@ const CreateBlogForm = ({
       }
     });
 
+    console.log("Formdata",formData)
     try {
-      console.log(formData)
       const res = await ApiRequest.post(
         `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`,
         formData
@@ -94,12 +101,37 @@ const CreateBlogForm = ({
           placeholder="Blog Name"
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
-        <textarea
+        <input
+          type="text"
           value={blogDescription}
           onChange={(e) => setBlogDescription(e.target.value)}
           placeholder="Blog Description"
           className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <input
+          type="text"
+          value={blogTitle}
+          onChange={(e) => setBlogTitle(e.target.value)}
+          placeholder="Blog Title"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <textarea
+          type="text"
+          value={titleDescription}
+          onChange={(e) => setTitleDescription(e.target.value)}
+          placeholder="Blog Description"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
         ></textarea>
+        <input
+          type="text"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          placeholder="Slug"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        
+        
+
         <input type="file" onChange={handleBlogImageChange} className="mb-4" />
 
         {sections.map((section, index) => (

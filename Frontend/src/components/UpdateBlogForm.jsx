@@ -12,6 +12,10 @@ const UpdateBlogForm = ({
 }) => {
   const [blogName, setBlogName] = useState("");
   const [blogDescription, setBlogDescription] = useState("");
+  const [blogTitle, setBlogTitle] = useState("");
+  const [titleDescription, setTitleDescription] = useState("");
+  const [slug, setSlug] = useState("");
+
   const [sections, setSections] = useState([]);
   const [blogImage, setBlogImage] = useState(null);
   const [sectionImages, setSectionImages] = useState([]);
@@ -24,10 +28,14 @@ const UpdateBlogForm = ({
           `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`
         );
         console.log(response);
-        const { blogName, blogDescription, sections } = response.data.result;
+        const { blogName, blogDescription,blogTitle,titleDescription,slug, blogImage, sections } = response.data.result;
         // console.log("response data", response.data);
         setBlogName(blogName);
         setBlogDescription(blogDescription);
+        setBlogTitle(blogTitle)
+        setTitleDescription(titleDescription)
+        setBlogImage(blogImage)
+        setSlug(slug)
         setSections(Array.isArray(sections) ? sections : []);
         setSectionImages(new Array(sections ? sections.length : 0).fill(null));
       } catch (error) {
@@ -80,6 +88,9 @@ const UpdateBlogForm = ({
     const formData = new FormData();
     formData.append("blogName", blogName);
     formData.append("blogDescription", blogDescription);
+    formData.append("blogTitle", blogTitle);
+    formData.append("titleDescription", titleDescription);
+    formData.append("slug", slug);
     formData.append("sections", JSON.stringify(sections));
     if (blogImage) {
       formData.append("blogImage", blogImage);
@@ -92,7 +103,7 @@ const UpdateBlogForm = ({
 
     try {
         console.log(formData);
-      const res = await ApiRequest.put(
+      const res = await ApiRequest.patch(
         `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`,
         formData
       );
@@ -124,12 +135,35 @@ const UpdateBlogForm = ({
           placeholder="Blog Name"
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
-        <textarea
+        <input
+          type="text"
           value={blogDescription}
           onChange={(e) => setBlogDescription(e.target.value)}
-          placeholder="Blog Description"
+          placeholder="Blog Decription"
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
+        <input
+          type="text"
+          value={blogTitle}
+          onChange={(e) => setBlogTitle(e.target.value)}
+          placeholder="Blog Title"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <textarea
+          type="text"
+          value={titleDescription}
+          onChange={(e) => setTitleDescription(e.target.value)}
+          placeholder="Title Description"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <input
+          type="text"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          placeholder="Blog Title"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        
         <input type="file" onChange={handleBlogImageChange} className="mb-4" />
         {Array.isArray(sections) &&
           sections.map((section, index) => (

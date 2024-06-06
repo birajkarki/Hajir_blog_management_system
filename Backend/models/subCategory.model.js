@@ -1,7 +1,7 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../database/database.js';
-import Category from './category.model.js';
-import Template from './template.model.js';
+import { DataTypes } from "sequelize";
+import { sequelize } from "../database/database.js";
+import Category from "./category.model.js";
+import Template from "./template.model.js";
 
 const SubCategory = sequelize.define(
   "SubCategory",
@@ -36,8 +36,7 @@ Category.hasMany(SubCategory, {
   foreignKey: "categoryId",
   onDelete: "CASCADE",
 });
-SubCategory.belongsTo(Category, { foreignKey: "categoryId" });
-
+SubCategory.belongsTo(Category, { foreignKey: "categoryId", allowNull: true });
 Template.hasMany(SubCategory, {
   foreignKey: "templateId",
   onDelete: "CASCADE",
