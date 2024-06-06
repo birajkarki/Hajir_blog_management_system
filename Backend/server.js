@@ -6,7 +6,8 @@ import { connectToDb } from "./database/database.js";
 import cloudinary from "cloudinary";
 
 console.log(process.env.NODE_ENV);
-const port = process.env.PORT;
+const port = 4000;
+// const port = process.env._PORT;
 
 connectToDb();
 

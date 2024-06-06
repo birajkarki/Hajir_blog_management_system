@@ -31,13 +31,13 @@ const Template = () => {
 
   const handleShowCreateTemplate = () => {
     setShowCreateTemplate(!showCreateTemplate);
-    setShowUpdateTemplate(false)
+    setShowUpdateTemplate(false);
   };
 
   const handleShowUpdateTemplate = (id) => {
     setUpdateTemplateId(id);
     setShowUpdateTemplate(!showUpdateTemplate);
-    setShowCreateTemplate(false)
+    setShowCreateTemplate(false);
   };
 
   const handleCreateTemplate = async (e) => {
@@ -149,7 +149,7 @@ const Template = () => {
             <p className="text-center col-span-full">Loading...</p>
           ) : (
             templates.map((template) => (
-              <div key={template.id} className="bg-white shadow-md rounded-lg overflow-hidden">
+              <div key={template.id} className="bg-white shadow-md rounded-lg overflow-hidden transition duration-300 transform hover:scale-105">
                 <div className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white">
                   {template.templateName}
                 </div>
@@ -158,7 +158,6 @@ const Template = () => {
                     className="text-purple-600 hover:text-purple-800 transition duration-300"
                     onClick={() => handleShowUpdateTemplate(template.id)}
                   >
-                    
                     <RxUpdate size={24} />
                   </button>
                   <button

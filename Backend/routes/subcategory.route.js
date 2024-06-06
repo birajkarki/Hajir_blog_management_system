@@ -11,7 +11,7 @@ import protect from "../middlewares/protect.js";
 
 const router = express.Router();
 
-router.use(verifyTemplate, verifyCategory);
+router.use(verifyTemplate);
 
 router.route("/").get(getAllSubCategory).post(protect,createSubCategory);
 router

@@ -35,6 +35,7 @@ const SubCategory = () => {
   }, [selectedTemplateId, template]);
 
   const getAllSubCategory = async (categoryId) => {
+    console.log("sub category", categoryId)
     if (!categoryId) return;
     try {
       setLoading(true);

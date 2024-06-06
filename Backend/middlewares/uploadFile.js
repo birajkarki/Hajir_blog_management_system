@@ -27,8 +27,6 @@ let fileFilter = (req, file, cb) => {
     ".PNG",
     ".WebP",
     ".WEBP",
-    ".jpg",
-    ".JPG",
   ];
 
   let originalName = file.originalname;

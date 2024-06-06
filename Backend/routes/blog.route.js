@@ -20,7 +20,7 @@ import { checkRole } from "../middlewares/checkRole.js";
 
 const router = express.Router();
 
-router.use(verifyTemplate, verifyCategory, verifySubcategory);
+router.use(verifyTemplate, verifySubcategory);
 
 router
   .route("/")

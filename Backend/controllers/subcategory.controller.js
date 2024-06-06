@@ -4,7 +4,7 @@ import Template from "../models/template.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 
-export const createSubCategory = CatchAsync(async (req, res) => {
+export const createSubCategory = CatchAsync(async (req, res, next) => {
   const subCategory = await SubCategory.create(req.obj);
   res.status(201).json({
     status: "success",
@@ -13,9 +13,10 @@ export const createSubCategory = CatchAsync(async (req, res) => {
   });
 });
 
-export const getAllSubCategory = CatchAsync(async (req, res) => {
+export const getAllSubCategory = CatchAsync(async (req, res, next) => {
+  const { templateId, categoryId = null } = req.obj;
   const subCategories = await SubCategory.findAll({
-    where: { templateId: req.template, categoryId: req.category },
+    where: { templateId, categoryId },
     include: {
       model: Category,
       attributes: ["id", "categoryName"],
@@ -34,8 +35,11 @@ export const getAllSubCategory = CatchAsync(async (req, res) => {
   });
 });
 
-export const getSubCategoryID = CatchAsync(async (req, res) => {
-  const subCategory = await SubCategory.findByPk(req.params.id);
+export const getSubCategoryID = CatchAsync(async (req, res, next) => {
+  const { templateId, categoryId = null } = req.obj;
+  const subCategory = await SubCategory.findOne({
+    where: { id: req.params.id, templateId, categoryId },
+  });
 
   if (!subCategory) {
     return next(new AppError("Sub Category not found!", 404));
@@ -48,7 +52,7 @@ export const getSubCategoryID = CatchAsync(async (req, res) => {
   });
 });
 
-export const updateSubCategory = CatchAsync(async (req, res) => {
+export const updateSubCategory = CatchAsync(async (req, res, next) => {
   const subCategory = await SubCategory.findByPk(req.params.id);
 
   if (!subCategory) {
@@ -63,7 +67,7 @@ export const updateSubCategory = CatchAsync(async (req, res) => {
   });
 });
 
-export const deleteSubCategory = CatchAsync(async (req, res) => {
+export const deleteSubCategory = CatchAsync(async (req, res, next) => {
   const subCategory = await SubCategory.findByPk(req.params.id);
 
   if (!subCategory) {

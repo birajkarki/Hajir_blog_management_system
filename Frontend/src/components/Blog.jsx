@@ -28,8 +28,7 @@ const Blog = () => {
   const [updateBlogId, setUpdateBlogId] = useState(null);
   const [blogId, setBlogId] = useState(null);
 
-
-  // -------------------------- Fetch Templates  -------------------------------------------
+  // Fetch Templates
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
@@ -45,7 +44,7 @@ const Blog = () => {
     setShowTemplates(true);
   }, []);
 
-  // -------------------------- Fetch All Blogs  -------------------------------------------
+  // Fetch All Blogs
   useEffect(() => {
     fetchAllBlogs();
   }, [selectedTemplateId, selectedCategoryId, selectedSubCategoryId]);
@@ -63,10 +62,15 @@ const Blog = () => {
       );
       const data = res.data.blogs;
 
+      console.log(selectedTemplateId, selectedCategoryId, selectedSubCategoryId)
+
       const formattedBlogs = data.map((item) => ({
         id: item.id,
         blogName: item.blogName,
         blogDescription: item.blogDescription,
+        blogTitle: item.blogTitle,
+        titleDescription: item.titleDescription,
+        slug: item.slug,
         blogImage: item.blogImage,
         status: item.status,
         templateId: item.templateId,
@@ -85,7 +89,8 @@ const Blog = () => {
       setLoading(false);
     }
   };
-  //  -------------------------  Set Categories and show Categories ------------------------
+
+  // Set Categories and show Categories
   useEffect(() => {
     if (selectedTemplateId) {
       const selectedTemplate = templates.find(
@@ -98,7 +103,7 @@ const Blog = () => {
     }
   }, [selectedTemplateId, templates]);
 
-  //  -------------------------  Set subCategories and show SubCategories ------------------------
+  // Set subCategories and show SubCategories
   useEffect(() => {
     if (selectedCategoryId) {
       const selectedCategory = categories.find(
@@ -111,24 +116,22 @@ const Blog = () => {
     }
   }, [selectedCategoryId, categories]);
 
-  // ------------------------ Handle Template Select ---------------------------------------------
+  // Handle Template Select
   const handleTemplateSelect = (templateId) => {
     setSelectedTemplateId(templateId);
     setSelectedCategoryId(null);
     setSelectedSubCategoryId(null);
     setShowBlog(false);
-
   };
-  // ------------------------ Handle Category Select ---------------------------------------------
 
+  // Handle Category Select
   const handleCategorySelect = (categoryId) => {
     setSelectedCategoryId(categoryId);
     setSelectedSubCategoryId(null);
     setShowBlog(false);
-
   };
 
-  // ------------------------ Handle SubCategory Select ---------------------------------------------
+  // Handle SubCategory Select
   const handleSubCategorySelect = (subCategoryId) => {
     setSelectedSubCategoryId(subCategoryId);
     setShowBlogs(true);
@@ -163,26 +166,22 @@ const Blog = () => {
   const handleCancelShowUpdate = () => {
     setShowUpdateBlog(false);
   };
-  
 
   const handleUpdateBlog = (blog) => {
     setUpdateBlogId(blog.id);
     setShowUpdateBlog(true);
     setShowBlog(false);
-
   };
+
   const handleBlogShow = (id) => {
-    console.log("id", id);
     setBlogId(id);
     setShowBlog(!showBlog);
     setShowBlogs(false);
-
   };
 
   const handleBackButton = () => {
     setShowBlog(false);
     setShowBlogs(true);
-
   };
 
   function limitDescription(text, sentenceLimit) {
@@ -191,6 +190,7 @@ const Blog = () => {
     const limitedText = limitSentence.join("");
     return limitedText;
   }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -220,7 +220,6 @@ const Blog = () => {
         Blogs
       </h1>
 
-      {/* -----------------------  Show Template ----------------------------------- */}
       <div className="rounded-lg p-6 mb-6">
         {!showCreateBlog && !showUpdateBlog && showTemplates && (
           <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
@@ -240,8 +239,7 @@ const Blog = () => {
           </ul>
         )}
 
-        {/* -----------------------  Show Category ----------------------------------- */}
-
+        {/* Show Category */}
         {!showCreateBlog && !showUpdateBlog && showCategories && (
           <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
             {categories.map((item) => (
@@ -259,8 +257,8 @@ const Blog = () => {
             ))}
           </ul>
         )}
-        {/* -----------------------  Show Sub Category ----------------------------------- */}
 
+        {/* Show Sub Category */}
         {!showCreateBlog && !showUpdateBlog && showSubCategories && (
           <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
             {subCategories.map((item) => (
@@ -279,7 +277,8 @@ const Blog = () => {
           </ul>
         )}
       </div>
-      
+
+      {/* Show Blog */}
       {showBlog && (
         <ShowBlog
           selectedTemplateId={selectedTemplateId}
@@ -290,8 +289,7 @@ const Blog = () => {
         />
       )}
 
-      {/*----------------- Show Create Blog Form --------------------------------  */}
-
+      {/* Create Blog Form */}
       {showCreateBlog && (
         <CreateBlogForm
           selectedTemplateId={selectedTemplateId}
@@ -301,6 +299,7 @@ const Blog = () => {
         />
       )}
 
+      {/* Update Blog Form */}
       {showUpdateBlog && (
         <UpdateBlogForm
           onCreateSuccess={handleCreateSuccess}
@@ -312,53 +311,44 @@ const Blog = () => {
         />
       )}
 
-      
-      {/*----------------- Show Blogs --------------------------------  */}
-
+      {/* Show Blogs */}
       {!showCreateBlog && !showUpdateBlog && showBlogs && (
-        <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {blogs.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {blogs.map((blog) => (
+            blogs.map((blog) => (
+              <div
+                key={blog.id}
+                className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer"
+              >
                 <div
-                  key={blog.id}
-                  className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer"
+                  className="flex justify-center bg-purple-500 p-4 text-xl font-semibold text-white"
+                  onClick={() => handleBlogShow(blog.id)}
                 >
-                  <div
-                    className="flex justify-center bg-purple-500 p-4 h-96 text-xl font-semibold text-white"
-                    onClick={() => handleBlogShow(blog.id)}
-                  >
-                    <div className="flex flex-col gap-4">
-                      <h2 className="text-lg">{blog.blogName}</h2>
-                      <img
-                        src={`http://${blog.blogImage}`}
-                        alt=""
-                        className="w-full h-8r rounded-md"
-                      />
-                      <p className="text-sm text-white/85">
-                        {limitDescription(blog.blogDescription, 1)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center p-4 bg-gray-100">
-                    <button
-                      className="text-purple-600 hover:text-purple-800 transition duration-300"
-                      onClick={() => handleUpdateBlog(blog)}
-                    >
-                      <RxUpdate size={24} />
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-800 transition duration-300"
-                      onClick={() => handleDeleteBlog(blog)}
-                    >
-                      <FiDelete size={24} />
-                    </button>
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-lg">{blog.blogName}</h2>
+                    <p className="text-sm text-white/85">
+                      {limitDescription(blog.blogDescription, 1)}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex justify-between items-center p-4 bg-gray-100">
+                  <button
+                    className="text-purple-600 hover:text-purple-800 transition duration-300"
+                    onClick={() => handleUpdateBlog(blog)}
+                  >
+                    <RxUpdate size={24} />
+                  </button>
+                  <button
+                    className="text-red-600 hover:text-red-800 transition duration-300"
+                    onClick={() => handleDeleteBlog(blog)}
+                  >
+                    <FiDelete size={24} />
+                  </button>
+                </div>
+              </div>
+            ))
           ) : (
-            <p className="text-center col-span-full">No blogs available</p>
+            <p className="text-center col-span-full">{error}</p>
           )}
         </div>
       )}

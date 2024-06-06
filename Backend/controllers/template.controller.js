@@ -1,9 +1,9 @@
 import Blog from "../models/blog.model.js";
-import Category from '../models/category.model.js';
-import SubCategory from '../models/subCategory.model.js';
+import Category from "../models/category.model.js";
+import SubCategory from "../models/subCategory.model.js";
 import Template from "../models/template.model.js";
 import AppError from "../utils/AppError.js";
-import { CatchAsync } from '../utils/catchAsync.js';
+import { CatchAsync } from "../utils/catchAsync.js";
 
 export const createTemplate = CatchAsync(async (req, res, next) => {
   const template = await Template.create(req.body);
@@ -19,14 +19,16 @@ export const getAllTemplates = CatchAsync(async (req, res, next) => {
   const templates = await Template.findAll({
     include: {
       model: Category,
-      attributes: ["id", "categoryName" ],
+      attributes: ["id", "categoryName"],
       include: {
         model: SubCategory,
-        attributes: ['id', "subCategoryName"]
-      }
-    }
-    
+        attributes: ["id", "subCategoryName"],
+      },
+    },
   });
+  if (!templates) {
+    return next(new AppError("No templates found", 404));
+  }
   res.status(200).json({
     status: "success",
     message: "Templates Fetched Successfully",

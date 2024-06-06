@@ -15,14 +15,33 @@ const Blog = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    blogTitle: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     blogImage: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    titleDescription: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     status: {
       type: DataTypes.ENUM,
       values: ["draft", "approved", "rejected"],
       allowNull: false,
+    },
+
+    sections: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
     },
     templateId: {
       type: DataTypes.INTEGER,
@@ -48,11 +67,6 @@ const Blog = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    sections: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
-    },
   },
   {
     tableName: "Blog",
@@ -71,7 +85,7 @@ Category.hasMany(Blog, {
   foreignKey: "categoryId",
   onDelete: "CASCADE",
 });
-Blog.belongsTo(Category, { foreignKey: "categoryId" });
+Blog.belongsTo(Category, { foreignKey: "categoryId", allowNull: true });
 
 SubCategory.hasMany(Blog, {
   foreignKey: "subcategoryId",
