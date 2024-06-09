@@ -12,6 +12,8 @@ const UpdateBlogForm = ({
 }) => {
   const [blogName, setBlogName] = useState("");
   const [blogDescription, setBlogDescription] = useState("");
+  const [titleTag, setTitleTag] = useState("");
+  const [metaTag, setMetaTag] = useState("");
   const [blogTitle, setBlogTitle] = useState("");
   const [titleDescription, setTitleDescription] = useState("");
   const [slug, setSlug] = useState("");
@@ -88,6 +90,8 @@ const UpdateBlogForm = ({
     const formData = new FormData();
     formData.append("blogName", blogName);
     formData.append("blogDescription", blogDescription);
+    formData.append("titleTag", titleTag);
+    formData.append("metaTag", metaTag);
     formData.append("blogTitle", blogTitle);
     formData.append("titleDescription", titleDescription);
     formData.append("slug", slug);
@@ -128,6 +132,20 @@ const UpdateBlogForm = ({
         <button onClick={handleCancelUpdate} className='bg-red-600 p-3 rounded-md text-white'>Cancel</button>
       </div>
       <form onSubmit={handleSubmit}>
+      <input
+          type="text"
+          value={titleTag}
+          onChange={(e) => setTitleTag(e.target.value)}
+          placeholder="Title Tag"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <input
+          type="text"
+          value={metaTag}
+          onChange={(e) => setMetaTag(e.target.value)}
+          placeholder="Meta Tag"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
         <input
           type="text"
           value={blogName}

@@ -20,6 +20,8 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     blogDescription: req.body.blogDescription,
     blogTitle: req.body.blogTitle,
     titleDescription: req.body.titleDescription,
+    metaTag: req.body.metaTag,
+    titleTag: req.body.titleTag,
     ...req.obj,
     status: "draft",
     slug: req.body.slug,
@@ -28,7 +30,7 @@ export const createBlog = CatchAsync(async (req, res, next) => {
   };
   const sections = JSON.parse(blog.sections);
   if (!sections) {
-    return next(new AppError("Section not found!", 404));
+    return next(new AppError("Section cannot be empty!", 404));
   }
 
   const sectionsData = sections.map((value, i) => {

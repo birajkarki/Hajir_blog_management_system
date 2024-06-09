@@ -9,6 +9,8 @@ const CreateBlogForm = ({
   onCreateSuccess,
 }) => {
   const [blogName, setBlogName] = useState("");
+  const [titleTag, setTitleTag] = useState("");
+  const [metaTag, setMetaTag] = useState("");
   const [blogDescription, setBlogDescription] = useState("");
   const [blogTitle, setBlogTitle] = useState("");
   const [titleDescription, setTitleDescription] = useState("");
@@ -61,6 +63,8 @@ const CreateBlogForm = ({
     const formData = new FormData();
     formData.append("blogName", blogName);
     formData.append("blogDescription", blogDescription);
+    formData.append("titleTag", titleTag);
+    formData.append("metaTag", metaTag);
     formData.append("blogTitle", blogTitle);
     formData.append("titleDescription", titleDescription);
     formData.append("slug", slug);
@@ -96,6 +100,20 @@ const CreateBlogForm = ({
       <form onSubmit={handleSubmit}>
         <input
           type="text"
+          value={titleTag}
+          onChange={(e) => setTitleTag(e.target.value)}
+          placeholder="Title Tag"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <input
+          type="text"
+          value={metaTag}
+          onChange={(e) => setMetaTag(e.target.value)}
+          placeholder="Meta Tag"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <input
+          type="text"
           value={blogName}
           onChange={(e) => setBlogName(e.target.value)}
           placeholder="Blog Name"
@@ -119,7 +137,7 @@ const CreateBlogForm = ({
           type="text"
           value={titleDescription}
           onChange={(e) => setTitleDescription(e.target.value)}
-          placeholder="Blog Description"
+          placeholder="Title Description"
           className="w-full px-4 py-2 mb-4 border rounded-md"
         ></textarea>
         <input

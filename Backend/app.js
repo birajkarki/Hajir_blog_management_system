@@ -8,6 +8,7 @@ import templateRoute from "./routes/template.route.js";
 import subCategoryRoute from "./routes/subcategory.route.js";
 import categoryRoute from "./routes/category.route.js";
 import blogRoute from "./routes/blog.route.js";
+import highlightRoute from "./routes/highlight.routes.js";
 import globalErrorHandler from "./controllers/error.controller.js";
 import extractObj from "./middlewares/extract.js";
 
@@ -47,6 +48,7 @@ app.use(
   blogRoute
 );
 app.use("/api/v1/:templateId/:subcategoryId/blog", extractObj, blogRoute);
+app.use("/api/v1/:blogId/highlight", extractObj, highlightRoute);
 
 app.use(globalErrorHandler);
 

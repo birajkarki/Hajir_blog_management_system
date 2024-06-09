@@ -18,6 +18,8 @@ const SubCategory = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [showCategories, setShowCategories] = useState(false);
 
+  console.log("subcategories", subCategory);
+
   useEffect(() => {
     getTemplate();
   }, []);
@@ -28,22 +30,44 @@ const SubCategory = () => {
         (t) => t.id === parseInt(selectedTemplateId)
       );
       setCategory(selectedTemplate ? selectedTemplate.Categories : []);
+      console.log(selectedTemplate);
+      if(selectedTemplate && selectedTemplate.Categories.length === 0) {
+        getAllSubCategory();
+
+      }
       setShowCategories(true);
     } else {
       setShowCategories(false);
     }
   }, [selectedTemplateId, template]);
 
-  const getAllSubCategory = async (categoryId) => {
-    console.log("sub category", categoryId)
-    if (!categoryId) return;
+  const getAllSubCategory = async (categoryId ) => {
+    // console.log("sub category", categoryId);
+    try {
+      if (!categoryId) {
+        setLoading(true);
+        const res = await ApiRequest.get(
+          `/${selectedTemplateId}/subcategory`
+        );
+        console.log(res);
+        setSubCategory(res.data.subCategories);
+        setLoading(false);
+      
+      };
+    } catch (error) {
+      console.log(error);
+    }
+
     try {
       setLoading(true);
-      const res = await ApiRequest.get(
-        `/${selectedTemplateId}/${categoryId}/subcategory`
-      );
-      setSubCategory(res.data.subCategories);
-      setLoading(false);
+     
+        const res = await ApiRequest.get(
+          `/${selectedTemplateId}/${categoryId}/subcategory`
+        );
+        setSubCategory(res.data.subCategories);
+        setLoading(false);
+  
+      
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -77,16 +101,30 @@ const SubCategory = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const newSubCategory = await ApiRequest.post(
-        `/${selectedTemplateId}/${selectedCategoryId}/subcategory`,
-        {
-          subCategoryName,
-        }
-      );
-      setShowCreateSubCategory(false);
+      if(selectedCategoryId) {
+        const newSubCategory = await ApiRequest.post(
+          `/${selectedTemplateId}/${selectedCategoryId}/subcategory`,
+          {
+            subCategoryName,
+          }
+        );
+        setShowCreateSubCategory(false);
       setSubCategoryName("");
       toast.success(newSubCategory.data.message);
       getAllSubCategory(selectedCategoryId);
+      } else {
+        const newSubCategory = await ApiRequest.post(
+          `/${selectedTemplateId}/subcategory`,
+          {
+            subCategoryName,
+          }
+        );
+        setShowCreateSubCategory(false);
+      setSubCategoryName("");
+      toast.success(newSubCategory.data.message);
+      getAllSubCategory(selectedCategoryId);
+      }
+      
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -135,12 +173,14 @@ const SubCategory = () => {
     setSelectedTemplateId(templateId);
     // When a template is selected, reset the selected category and subcategory
     setSelectedCategoryId(null);
-    setSubCategory([]);
+    // setSubCategory([]);
+
   };
 
   const handleCategorySelect = (categoryId) => {
     setSelectedCategoryId(categoryId);
     getAllSubCategory(categoryId);
+
   };
 
   return (
@@ -160,7 +200,7 @@ const SubCategory = () => {
 
       <div className="rounded-lg p-6 mb-6">
         {!showCreateSubCategory && !showUpdateSubCategory && (
-          <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
+          <ul className="flex flex-wrap justify-center gap-4 border-4 rounded-full w-full max-w-4xl mx-auto mb-5 px-5 py-2">
             {template.map((item) => (
               <li
                 key={item.id}
@@ -178,7 +218,7 @@ const SubCategory = () => {
         )}
 
         {!showCreateSubCategory && !showUpdateSubCategory && showCategories && (
-          <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
+          <ul className="flex flex-wrap justify-center gap-4 border-4 rounded-full w-full max-w-4xl mx-auto mb-5 px-5 py-2">
             {category.map((item) => (
               <li
                 key={item.id}
@@ -195,7 +235,7 @@ const SubCategory = () => {
           </ul>
         )}
       </div>
-
+{/* -------------------- Create Sub Category Form -------------------------------- */}
       {showCreateSubCategory && (
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <form
@@ -208,7 +248,7 @@ const SubCategory = () => {
             <input
               type="text"
               placeholder="Enter Sub Category Name"
-              className="mb-4 px-4 py-2 border rounded-md w-full               focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="mb-4 px-4 py-2 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
               value={subCategoryName}
               onChange={(e) => setSubCategoryName(e.target.value)}
             />
@@ -221,6 +261,7 @@ const SubCategory = () => {
           </form>
         </div>
       )}
+{/* -------------------- Create Update Category Form -------------------------------- */}
 
       {showUpdateSubCategory && (
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
@@ -252,51 +293,41 @@ const SubCategory = () => {
         </div>
       )}
 
-      {!showCreateSubCategory && !showUpdateSubCategory && (
+      {!showCreateSubCategory && !showUpdateSubCategory && subCategory && (
         <div>
           {loading ? (
             <p className="text-center col-span-full">Loading...</p>
           ) : (
-            <div>
-              {subCategory.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {subCategory.map((category) => (
-                    <div
-                      key={category.id}
-                      className={`${
-                        category.selected
-                          ? "border-purple-500"
-                          : "border-transparent"
-                      } bg-white shadow-md rounded-lg overflow-hidden cursor-pointer`}
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+              {subCategory.map((category) => (
+                <div
+                  key={category.id}
+                  className="bg-white rounded-lg p-4 shadow-md flex justify-between items-center"
+                >
+                  <span className="font-semibold text-lg">
+                    {category.subCategoryName}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      className="bg-yellow-500 text-white p-2 rounded-md"
+                      onClick={() =>
+                        handleShowUpdateSubCategory(
+                          category.id,
+                          category.subCategoryName
+                        )
+                      }
                     >
-                      <div className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white">
-                        <div className="flex flex-col">
-                          <h2>{category.subCategoryName}</h2>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center p-4 bg-gray-100">
-                        <button
-                          className="text-purple-600 hover:text-purple-800 transition duration-300"
-                          onClick={() =>
-                            handleShowUpdateSubCategory(
-                              category.id,
-                              category.subCategoryName
-                            )
-                          }
-                        >
-                          <RxUpdate size={24} />
-                        </button>
-                        <button
-                          className="text-red-600 hover:text-red-800 transition duration-300"
-                          onClick={() => handleDeleteSubCategory(category.id)}
-                        >
-                          <FiDelete size={24} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                      <RxUpdate />
+                    </button>
+                    <button
+                      className="bg-red-500 text-white p-2 rounded-md"
+                      onClick={() => handleDeleteSubCategory(category.id)}
+                    >
+                      <FiDelete />
+                    </button>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
           )}
         </div>
