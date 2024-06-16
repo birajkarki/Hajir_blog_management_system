@@ -20,12 +20,11 @@ import { checkRole } from "../middlewares/checkRole.js";
 
 const router = express.Router();
 
-router.use(verifyTemplate, verifySubcategory);
-
 router
   .route("/")
   .get(getAllBlogs)
   .post(
+
     protect,
     upload.fields([
       { name: "blogImage", maxCount: 1 },
@@ -33,6 +32,9 @@ router
     ]),
     createBlog
   );
+
+
+
 router
   .route("/:id")
   .get(getBlogID)

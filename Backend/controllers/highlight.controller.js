@@ -51,3 +51,15 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
     });
   }
 });
+export const getHighlights = CatchAsync(async (req, res, next) => {
+  const { blogId } = req.obj;
+  const highlights = await Highlight.findOne({ where: { blogId } });
+  if (!highlights) {
+    return next(new AppError("Highlight sections cannot be empty"), 404);
+  }
+  res.status(200).json({
+    success: true,
+    message: "Highlight fetched successfully",
+    highlights,
+  });
+});

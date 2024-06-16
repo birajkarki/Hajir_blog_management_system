@@ -86,7 +86,7 @@ export const getBlogID = CatchAsync(async (req, res, next) => {
   const { templateId, categoryId = null, subcategoryId } = req.obj;
   const blogId = req.params.id;
   const blog = await Blog.findOne({
-    where: { id: blogId, templateId, categoryId, subcategoryId },
+    where: { id: blogId },
   });
   if (!blog) {
     return next(new AppError("Blog not Found with that ID!", 404));
