@@ -31,7 +31,7 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
       highlightSections,
       blogId,
     });
-    res.status(400).json({
+    res.status(201).json({
       success: true,
       message: "Highlight created successfully",
       highlight,

@@ -1,13 +1,13 @@
-import { useNavigate } from "react-router-dom";
-import ApiRequest from "../utils/apiRequest";
-import { toast } from "react-toastify";
 import { useContext, useEffect, useState } from "react";
-import { Context } from "../context/Context";
 import { FaRegUser } from "react-icons/fa";
-import Template from "../components/Template";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Blog from "../components/Blog";
-import SubCategory from "../components/SubCategory";
 import Category from "../components/Category";
+import SubCategory from "../components/SubCategory";
+import Template from "../components/Template";
+import { Context } from "../context/Context";
+import ApiRequest from "../utils/apiRequest";
 
 const Homepage = () => {
   const { user, isAuthenticated, setIsAuthenticated } = useContext(Context);
@@ -92,7 +92,7 @@ const Homepage = () => {
               >
                 Template
               </li>
-              
+
               <li
                 className={` transition-colors cursor-pointer rounded-md duration-100 ${
                   selectOption === "Category"
@@ -124,7 +124,7 @@ const Homepage = () => {
                 Blog
               </li>
             </ul>
-            <div className='mt-10'>
+            <div className="mt-10">
               <button
                 onClick={handleLogout}
                 className="px-6 py-1 bg-purple-500 text-white font-semibold rounded-md shadow-2xl ease-in duration-100 hover:bg-purple-700"

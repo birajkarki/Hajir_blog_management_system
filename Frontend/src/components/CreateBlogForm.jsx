@@ -15,17 +15,27 @@ const CreateBlogForm = ({
   const [blogTitle, setBlogTitle] = useState("");
   const [titleDescription, setTitleDescription] = useState("");
   const [slug, setSlug] = useState("");
+  const [highlightTitle, setHighlightTitle] = useState("");
+  const [highlightDescription, setHighlightDescription] = useState("");
 
   const [blogImage, setBlogImage] = useState(null);
   const [sections, setSections] = useState([{ name: "", text: "" }]);
+  const [highlightSections, setHighlightSections] = useState([
+    { title: "", description: "" },
+  ]);
+  const [highlightImages, setHighlightImages] = useState([]);
   const [sectionImages, setSectionImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  
 
   const handleSectionChange = (index, key, value) => {
     const updatedSections = [...sections];
     updatedSections[index][key] = value;
     setSections(updatedSections);
+  };
+  const handleHighlightSectionChange = (index, key, value) => {
+    const updatedHighlightSections = [...highlightSections];
+    updatedHighlightSections[index][key] = value;
+    setHighlightSections(updatedHighlightSections);
   };
 
   const handleSectionImageChange = (index, e) => {
@@ -34,11 +44,26 @@ const CreateBlogForm = ({
     updatedSectionImages[index] = files[0];
     setSectionImages(updatedSectionImages);
   };
+  const handleHighlightSectionImageChange = (index, e) => {
+    const files = e.target.files;
+    const updatedHighlightImages = [...highlightImages];
+    updatedHighlightImages[index] = files[0];
+    setHighlightImages(updatedHighlightImages);
+  };
 
   const handleAddSection = () => {
     if (sections.length < 5) {
       setSections([...sections, { name: "", text: "" }]);
       setSectionImages([...sectionImages, null]);
+    }
+  };
+  const handleAddHighlightSection = () => {
+    if (highlightSections.length < 3) {
+      setHighlightSections([
+        ...highlightSections,
+        { title: "", description: "" },
+      ]);
+      setHighlightImages([...highlightImages, null]);
     }
   };
 
@@ -51,6 +76,15 @@ const CreateBlogForm = ({
     updatedSectionImages.splice(index, 1);
     setSectionImages(updatedSectionImages);
   };
+  const handleRemoveHighlightSection = (index) => {
+    const updatedHighlightSections = [...highlightSections];
+    updatedHighlightSections.splice(index, 1);
+    setHighlightSections(updatedHighlightSections);
+
+    const updatedHighlightImages = [...highlightImages];
+    updatedHighlightImages.splice(index, 1);
+    setSectionImages(highlightImages);
+  };
 
   const handleBlogImageChange = (e) => {
     setBlogImage(e.target.files[0]);
@@ -60,7 +94,14 @@ const CreateBlogForm = ({
     e.preventDefault();
     setIsLoading(true);
 
+    if (!highlightSections.length) {
+      toast.error("Highlight sections cannot be empty");
+      setIsLoading(false);
+      return;
+    }
+
     const formData = new FormData();
+    const highlightFormData = new FormData();
     formData.append("blogName", blogName);
     formData.append("blogDescription", blogDescription);
     formData.append("titleTag", titleTag);
@@ -69,6 +110,12 @@ const CreateBlogForm = ({
     formData.append("titleDescription", titleDescription);
     formData.append("slug", slug);
     formData.append("sections", JSON.stringify(sections));
+    highlightFormData.append("highlightTitle", highlightTitle);
+    highlightFormData.append("highlightDescription", highlightDescription);
+    highlightFormData.append(
+      "highlightSections",
+      JSON.stringify(highlightSections)
+    );
     if (blogImage) {
       formData.append("blogImage", blogImage);
     }
@@ -77,13 +124,26 @@ const CreateBlogForm = ({
         formData.append(`sectionImages`, image);
       }
     });
+    highlightImages.forEach((image, index) => {
+      if (image) {
+        highlightFormData.append(`highlightSectionImages`, image);
+      }
+    });
 
-    console.log("Formdata",formData)
     try {
-      const res = await ApiRequest.post(
-        `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`,
-        formData
+      let apiUrl;
+      if (selectedCategoryId) {
+        apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`;
+      } else {
+        apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog`;
+      }
+      const blog_res = await ApiRequest.post(apiUrl, formData);
+      const blogId = blog_res.data.blog.id;
+      const highlight_res = await ApiRequest.post(
+        `/${blogId}/highlight`,
+        highlightFormData
       );
+
       onCreateSuccess();
       toast.success("Blog Created Successfully");
     } catch (error) {
@@ -147,8 +207,6 @@ const CreateBlogForm = ({
           placeholder="Slug"
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
-        
-        
 
         <input type="file" onChange={handleBlogImageChange} className="mb-4" />
 
@@ -185,6 +243,7 @@ const CreateBlogForm = ({
             </button>
           </div>
         ))}
+
         <button
           type="button"
           onClick={handleAddSection}
@@ -192,6 +251,65 @@ const CreateBlogForm = ({
         >
           Add Section
         </button>
+        <input
+          type="text"
+          value={highlightTitle}
+          onChange={(e) => setHighlightTitle(e.target.value)}
+          placeholder="Highlight Title"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        />
+        <textarea
+          type="text"
+          value={highlightDescription}
+          onChange={(e) => setHighlightDescription(e.target.value)}
+          placeholder="Highlight Description"
+          className="w-full px-4 py-2 mb-4 border rounded-md"
+        ></textarea>
+        {highlightSections.map((section, index) => (
+          <div key={index} className="mb-4">
+            <input
+              type="text"
+              value={section.title}
+              onChange={(e) =>
+                handleHighlightSectionChange(index, "title", e.target.value)
+              }
+              placeholder={`Highlight Section ${index + 1}`}
+              className="w-full px-4 py-2 mb-2 border rounded-md"
+            />
+            <textarea
+              value={section.description}
+              onChange={(e) =>
+                handleHighlightSectionChange(
+                  index,
+                  "description",
+                  e.target.value
+                )
+              }
+              placeholder={`Highlight Section Text ${index + 1}`}
+              className="w-full px-4 py-2 mb-2 border rounded-md"
+            ></textarea>
+            <input
+              type="file"
+              onChange={(e) => handleHighlightSectionImageChange(index, e)}
+              className="mb-2"
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveHighlightSection(index)}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 "
+            >
+              Remove Highlight Section
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={handleAddHighlightSection}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4 mr-5"
+        >
+          Add Highlight Section
+        </button>
+        <br />
         <button
           type="submit"
           disabled={isLoading}
