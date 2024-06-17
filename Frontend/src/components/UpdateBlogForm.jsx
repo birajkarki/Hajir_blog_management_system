@@ -8,7 +8,7 @@ const UpdateBlogForm = ({
   selectedCategoryId,
   selectedSubCategoryId,
   onCreateSuccess,
-  handleCancel
+  handleCancel,
 }) => {
   const [blogName, setBlogName] = useState("");
   const [blogDescription, setBlogDescription] = useState("");
@@ -22,24 +22,62 @@ const UpdateBlogForm = ({
   const [blogImage, setBlogImage] = useState(null);
   const [sectionImages, setSectionImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [highlightTitle, setHighlightTitle] = useState("");
+  const [highlightDescription, setHighlightDescription] = useState("");
+  const [highlightSections, setHighlightSections] = useState([
+    { title: "", description: "" },
+  ]);
+  const [highlightImages, setHighlightImages] = useState([]);
   useEffect(() => {
     const fetchBlogData = async () => {
+      console.log(
+        selectedTemplateId,
+        selectedCategoryId,
+        selectedSubCategoryId,
+        blogId
+      );
       try {
-        const response = await ApiRequest.get(
-          `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`
-        );
-        console.log(response);
-        const { blogName, blogDescription,blogTitle,titleDescription,slug, blogImage, sections } = response.data.result;
-        // console.log("response data", response.data);
+        let apiUrl;
+        if (selectedCategoryId) {
+          apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`;
+        } else {
+          apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog/${blogId}`;
+        }
+        console.log(apiUrl);
+        const response = await ApiRequest.get(apiUrl);
+        const highlight_response = await ApiRequest.get(`/${blogId}/highlight`);
+        console.log(highlight_response);
+        const {
+          titleTag,
+          metaTag,
+          blogName,
+          blogDescription,
+          blogTitle,
+          titleDescription,
+          slug,
+          blogImage,
+          sections,
+        } = response.data.result;
+        const { highlightTitle, highlightDescription, highlightSections } =
+          highlight_response.data.highlights;
+        setTitleTag(titleTag);
+        setMetaTag(metaTag);
         setBlogName(blogName);
         setBlogDescription(blogDescription);
-        setBlogTitle(blogTitle)
-        setTitleDescription(titleDescription)
-        setBlogImage(blogImage)
-        setSlug(slug)
+        setBlogTitle(blogTitle);
+        setTitleDescription(titleDescription);
+        setBlogImage(blogImage);
+        setSlug(slug);
         setSections(Array.isArray(sections) ? sections : []);
         setSectionImages(new Array(sections ? sections.length : 0).fill(null));
+        setHighlightTitle(highlightTitle);
+        setHighlightDescription(highlightDescription);
+        setHighlightSections(
+          Array.isArray(highlightSections) ? highlightSections : []
+        );
+        setHighlightImages(
+          new Array(highlightSections ? highlightSections.length : 0).fill(null)
+        );
       } catch (error) {
         console.error("Error fetching blog data:", error);
         toast.error("Error fetching blog data");
@@ -49,10 +87,16 @@ const UpdateBlogForm = ({
     fetchBlogData();
   }, [blogId, selectedTemplateId, selectedCategoryId, selectedSubCategoryId]);
 
-  const handleSectionChange = (index, key, value) => {
+  const handleSectionChange = (index, key, id, value) => {
     const updatedSections = [...sections];
     updatedSections[index][key] = value;
+    updatedSections[index]["id"] = id;
     setSections(updatedSections);
+  };
+  const handleHighlightSectionChange = (index, key, value) => {
+    const updatedHighlightSections = [...highlightSections];
+    updatedHighlightSections[index][key] = value;
+    setHighlightSections(updatedHighlightSections);
   };
 
   const handleSectionImageChange = (index, e) => {
@@ -61,12 +105,27 @@ const UpdateBlogForm = ({
     updatedSectionImages[index] = files[0];
     setSectionImages(updatedSectionImages);
   };
+  const handleHighlightSectionImageChange = (index, e) => {
+    const files = e.target.files;
+    const updatedHighlightImages = [...highlightImages];
+    updatedHighlightImages[index] = files[0];
+    setHighlightImages(updatedHighlightImages);
+  };
 
   const handleAddSection = () => {
     if (sections.length < 5) {
-        setSections([...sections, { name: "", text: "" }]);
-        setSectionImages([...sectionImages, null]);
-      }
+      setSections([...sections, { name: "", text: "" }]);
+      setSectionImages([...sectionImages, null]);
+    }
+  };
+  const handleAddHighlightSection = () => {
+    if (highlightSections.length < 3) {
+      setHighlightSections([
+        ...highlightSections,
+        { title: "", description: "" },
+      ]);
+      setHighlightImages([...highlightImages, null]);
+    }
   };
 
   const handleRemoveSection = (index) => {
@@ -78,6 +137,15 @@ const UpdateBlogForm = ({
     updatedSectionImages.splice(index, 1);
     setSectionImages(updatedSectionImages);
   };
+  const handleRemoveHighlightSection = (index) => {
+    const updatedHighlightSections = [...highlightSections];
+    updatedHighlightSections.splice(index, 1);
+    setHighlightSections(updatedHighlightSections);
+
+    const updatedHighlightImages = [...highlightImages];
+    updatedHighlightImages.splice(index, 1);
+    setSectionImages(highlightImages);
+  };
 
   const handleBlogImageChange = (e) => {
     setBlogImage(e.target.files[0]);
@@ -87,7 +155,14 @@ const UpdateBlogForm = ({
     e.preventDefault();
     setIsLoading(true);
 
+    // if (!highlightSections.length) {
+    //   toast.error("Highlight sections cannot be empty");
+    //   setIsLoading(false);
+    //   return;
+    // }
+
     const formData = new FormData();
+    const highlightFormData = new FormData();
     formData.append("blogName", blogName);
     formData.append("blogDescription", blogDescription);
     formData.append("titleTag", titleTag);
@@ -96,6 +171,12 @@ const UpdateBlogForm = ({
     formData.append("titleDescription", titleDescription);
     formData.append("slug", slug);
     formData.append("sections", JSON.stringify(sections));
+    highlightFormData.append("highlightTitle", highlightTitle);
+    highlightFormData.append("highlightDescription", highlightDescription);
+    highlightFormData.append(
+      "highlightSections",
+      JSON.stringify(highlightSections)
+    );
     if (blogImage) {
       formData.append("blogImage", blogImage);
     }
@@ -104,13 +185,28 @@ const UpdateBlogForm = ({
         formData.append(`sectionImages`, image);
       }
     });
+    highlightImages.forEach((image, index) => {
+      if (image) {
+        highlightFormData.append(`highlightSectionImages`, image);
+      }
+    });
 
     try {
-        console.log(formData);
-      const res = await ApiRequest.patch(
-        `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`,
-        formData
-      );
+      let apiUrl;
+      if (selectedCategoryId) {
+        apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blogId}`;
+      } else {
+        apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog/${blogId}`;
+      }
+      await ApiRequest.patch(apiUrl, formData);
+      highlightSections
+        ? await ApiRequest.patch(`/${blogId}/highlight`, highlightFormData)
+        : null;
+      // const highlight_res = await ApiRequest.patch(
+      //   `/${blogId}/highlight`,
+      //   highlightFormData
+      // );
+
       onCreateSuccess();
       toast.success("Blog Updated Successfully");
     } catch (error) {
@@ -123,16 +219,21 @@ const UpdateBlogForm = ({
 
   const handleCancelUpdate = () => {
     handleCancel();
-  }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="flex flex-row justify-between mb-4">
         <h2 className="text-2xl font-bold mb-4">Update Blog</h2>
-        <button onClick={handleCancelUpdate} className='bg-red-600 p-3 rounded-md text-white'>Cancel</button>
+        <button
+          onClick={handleCancelUpdate}
+          className="bg-red-600 p-3 rounded-md text-white"
+        >
+          Cancel
+        </button>
       </div>
       <form onSubmit={handleSubmit}>
-      <input
+        <input
           type="text"
           value={titleTag}
           onChange={(e) => setTitleTag(e.target.value)}
@@ -181,7 +282,7 @@ const UpdateBlogForm = ({
           placeholder="Blog Title"
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
-        
+
         <input type="file" onChange={handleBlogImageChange} className="mb-4" />
         {Array.isArray(sections) &&
           sections.map((section, index) => (
@@ -223,6 +324,51 @@ const UpdateBlogForm = ({
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4 mr-5"
         >
           Add Section
+        </button>
+        {Array.isArray(highlightSections) &&
+          highlightSections.map((highlight, index) => (
+            <div key={index} className="mb-4">
+              <input
+                type="text"
+                value={highlight.title}
+                onChange={(e) =>
+                  handleHighlightSectionChange(index, "title", e.target.value)
+                }
+                placeholder={`Highlight ${index + 1} Name`}
+                className="w-full px-4 py-2 mb-2 border rounded-md"
+              />
+              <textarea
+                value={highlight.description}
+                onChange={(e) =>
+                  handleHighlightSectionChange(
+                    index,
+                    "description",
+                    e.target.value
+                  )
+                }
+                placeholder={`Highlight ${index + 1} Text`}
+                className="w-full px-4 py-2 mb-2 border rounded-md"
+              />
+              <input
+                type="file"
+                onChange={(e) => handleHighlightSectionImageChange(index, e)}
+                className="mb-2"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveHighlightSection(index)}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Remove Highlight Section
+              </button>
+            </div>
+          ))}
+        <button
+          type="button"
+          onClick={handleAddHighlightSection}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4 mr-5"
+        >
+          Add Highlight Section
         </button>
         <button
           type="submit"

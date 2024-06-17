@@ -175,9 +175,9 @@ const Blog = () => {
   const handleDeleteBlog = async (blog) => {
     let apiUrl;
     if (selectedCategoryId) {
-      apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`;
+      apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blog.id}`;
     } else {
-      apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog`;
+      apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog/${blog.id}`;
     }
     try {
       await ApiRequest.delete(apiUrl);
