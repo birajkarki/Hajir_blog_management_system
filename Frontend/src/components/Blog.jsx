@@ -20,7 +20,7 @@ const Blog = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
-  const [showTemplates, setShowTemplates] = useState(null);
+  const [showTemplates, setShowTemplates] = useState(true);
   const [showCategories, setShowCategories] = useState(false);
   const [showSubCategories, setShowSubCategories] = useState(false);
   const [showBlog, setShowBlog] = useState(false);
@@ -35,13 +35,12 @@ const Blog = () => {
         const res = await ApiRequest.get("/template");
         setTemplates(res.data.templates);
       } catch (error) {
-        console.log(error);
+        console.error(error);
         setError("Failed to fetch templates.");
       }
     };
 
     fetchTemplates();
-    setShowTemplates(true);
   }, []);
 
   // Fetch All Blogs
@@ -50,22 +49,26 @@ const Blog = () => {
   }, [selectedTemplateId, selectedCategoryId, selectedSubCategoryId]);
 
   const fetchAllBlogs = async () => {
-    if (!selectedTemplateId || !selectedCategoryId || !selectedSubCategoryId) {
+    if (!selectedTemplateId) {
       setBlogs([]);
       setLoading(false);
       return;
     }
 
+    let apiUrl;
+    if (selectedCategoryId) {
+      apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`;
+    } else {
+      apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog`;
+    }
+
     try {
-      const res = await ApiRequest.get(
-        `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog`
-      );
-      const data = res.data.blogs;
-
-      console.log(selectedTemplateId, selectedCategoryId, selectedSubCategoryId)
-
+      const res = await ApiRequest.get(apiUrl);
+      const data = res?.data?.blogs;
       const formattedBlogs = data.map((item) => ({
         id: item.id,
+        titleTag: item.titleTag || null,
+        metaTag: item.metaTag || null,
         blogName: item.blogName,
         blogDescription: item.blogDescription,
         blogTitle: item.blogTitle,
@@ -82,9 +85,13 @@ const Blog = () => {
         subCategory: item.SubCategory,
       }));
 
+      console.log("Formatted Blogs", blogs);
+
       setBlogs(formattedBlogs);
+      console.log("blog", blogs);
       setLoading(false);
     } catch (error) {
+      console.log(error);
       setError("Failed to load blogs");
       setLoading(false);
     }
@@ -102,6 +109,27 @@ const Blog = () => {
       setShowCategories(false);
     }
   }, [selectedTemplateId, templates]);
+
+  // Fetch SubCategories if no categories
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      if (selectedTemplateId && categories.length === 0) {
+        try {
+          const subcategoryRes = await ApiRequest.get(
+            `/${selectedTemplateId}/subcategory`
+          );
+          const subcategoriesData = subcategoryRes.data.subCategories;
+          setSubCategories(subcategoriesData);
+          setShowSubCategories(true);
+        } catch (error) {
+          console.error("Failed to fetch subcategories:", error);
+          setError("Failed to fetch subcategories.");
+        }
+      }
+    };
+
+    fetchSubCategories();
+  }, [categories, selectedTemplateId]);
 
   // Set subCategories and show SubCategories
   useEffect(() => {
@@ -145,10 +173,14 @@ const Blog = () => {
   };
 
   const handleDeleteBlog = async (blog) => {
+    let apiUrl;
+    if (selectedCategoryId) {
+      apiUrl = `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blog.id}`;
+    } else {
+      apiUrl = `/${selectedTemplateId}/${selectedSubCategoryId}/blog/${blog.id}`;
+    }
     try {
-      await ApiRequest.delete(
-        `/${selectedTemplateId}/${selectedCategoryId}/${selectedSubCategoryId}/blog/${blog.id}`
-      );
+      await ApiRequest.delete(apiUrl);
 
       toast.success("Blog Deleted Successfully");
       fetchAllBlogs();
@@ -205,6 +237,11 @@ const Blog = () => {
     );
   }
 
+  // Filtered Templates
+  const filteredTemplates = templates.filter((template) =>
+    ["product", "solution"].includes(template.templateName.toLowerCase())
+  );
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-end mb-6">
@@ -222,8 +259,8 @@ const Blog = () => {
 
       <div className="rounded-lg p-6 mb-6">
         {!showCreateBlog && !showUpdateBlog && showTemplates && (
-          <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
-            {templates.map((item) => (
+          <ul className="flex flex-wrap justify-center gap-4 border-4 rounded-full w-full max-w-4xl mx-auto mb-5 px-5 py-2">
+            {filteredTemplates.map((item) => (
               <li
                 key={item.id}
                 onClick={() => handleTemplateSelect(item.id)}
@@ -240,27 +277,31 @@ const Blog = () => {
         )}
 
         {/* Show Category */}
-        {!showCreateBlog && !showUpdateBlog && showCategories && (
-          <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
-            {categories.map((item) => (
-              <li
-                key={item.id}
-                onClick={() => handleCategorySelect(item.id)}
-                className={`cursor-pointer px-4 py-2 rounded-full transition-colors duration-300 ${
-                  selectedCategoryId === item.id
-                    ? "bg-purple-500 text-white"
-                    : " text-black hover:bg-purple-200"
-                }`}
-              >
-                {item.categoryName}
-              </li>
-            ))}
-          </ul>
-        )}
+        {!(categories.length === 0)
+          ? !showCreateBlog &&
+            !showUpdateBlog &&
+            showCategories && (
+              <ul className="flex flex-wrap justify-center gap-4 border-4 rounded-full w-full max-w-4xl mx-auto mb-5 px-5 py-2">
+                {categories.map((item) => (
+                  <li
+                    key={item.id}
+                    onClick={() => handleCategorySelect(item.id)}
+                    className={`cursor-pointer px-4 py-2 rounded-full transition-colors duration-300 ${
+                      selectedCategoryId === item.id
+                        ? "bg-purple-500 text-white"
+                        : " text-black hover:bg-purple-200"
+                    }`}
+                  >
+                    {item.categoryName}
+                  </li>
+                ))}
+              </ul>
+            )
+          : null}
 
         {/* Show Sub Category */}
         {!showCreateBlog && !showUpdateBlog && showSubCategories && (
-          <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
+          <ul className="flex flex-wrap justify-center gap-4 border-4 rounded-full w-full max-w-4xl mx-auto mb-5 px-5 py-2">
             {subCategories.map((item) => (
               <li
                 key={item.id}
@@ -348,7 +389,7 @@ const Blog = () => {
               </div>
             ))
           ) : (
-            <p className="text-center col-span-full">{error}</p>
+            <p className="text-center col-span-full">"No blogs Found"</p>
           )}
         </div>
       )}

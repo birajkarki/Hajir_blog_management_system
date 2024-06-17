@@ -7,6 +7,14 @@ import SubCategory from "./subCategory.model.js";
 const Blog = sequelize.define(
   "Blog",
   {
+    titleTag: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    metaTag: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     blogName: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -37,12 +45,12 @@ const Blog = sequelize.define(
       values: ["draft", "approved", "rejected"],
       allowNull: false,
     },
-
     sections: {
       type: DataTypes.JSON,
       allowNull: false,
       defaultValue: [],
     },
+
     templateId: {
       type: DataTypes.INTEGER,
       references: {

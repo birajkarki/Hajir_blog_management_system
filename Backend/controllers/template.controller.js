@@ -16,7 +16,8 @@ export const createTemplate = CatchAsync(async (req, res, next) => {
 });
 
 export const getAllTemplates = CatchAsync(async (req, res, next) => {
-  const templates = await Template.findAll({
+  const templates = await Template.findAll(
+    {
     include: {
       model: Category,
       attributes: ["id", "categoryName"],
@@ -25,7 +26,8 @@ export const getAllTemplates = CatchAsync(async (req, res, next) => {
         attributes: ["id", "subCategoryName"],
       },
     },
-  });
+  }
+);
   if (!templates) {
     return next(new AppError("No templates found", 404));
   }

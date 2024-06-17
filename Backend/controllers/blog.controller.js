@@ -20,6 +20,8 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     blogDescription: req.body.blogDescription,
     blogTitle: req.body.blogTitle,
     titleDescription: req.body.titleDescription,
+    metaTag: req.body.metaTag,
+    titleTag: req.body.titleTag,
     ...req.obj,
     status: "draft",
     slug: req.body.slug,
@@ -28,7 +30,7 @@ export const createBlog = CatchAsync(async (req, res, next) => {
   };
   const sections = JSON.parse(blog.sections);
   if (!sections) {
-    return next(new AppError("Section not found!", 404));
+    return next(new AppError("Section cannot be empty!", 404));
   }
 
   const sectionsData = sections.map((value, i) => {
@@ -84,7 +86,7 @@ export const getBlogID = CatchAsync(async (req, res, next) => {
   const { templateId, categoryId = null, subcategoryId } = req.obj;
   const blogId = req.params.id;
   const blog = await Blog.findOne({
-    where: { id: blogId, templateId, categoryId, subcategoryId },
+    where: { id: blogId },
   });
   if (!blog) {
     return next(new AppError("Blog not Found with that ID!", 404));
@@ -98,22 +100,34 @@ export const getBlogID = CatchAsync(async (req, res, next) => {
 
 export const updateBlog = CatchAsync(async (req, res, next) => {
   let blogImageUrl;
-  if (req.files.blogImage && req.files.blogImage[0]) {
+  let sectionImageUrls = [];
+  let sectionData = [];
+  if (req.files && req.files.blogImage && req.files.blogImage[0]) {
     const blogImageUpload = await cloudinary.uploader.upload(
       req.files.blogImage[0].path
     );
     blogImageUrl = blogImageUpload.secure_url;
   }
-  // console.log("url:", sectionImageUrls);
+
+  if (req.body.sections && req.files && req.files.sectionImages) {
+    const sectionImageUploads = await Promise.all(
+      req.files.sectionImages.map((file) =>
+        cloudinary.uploader.upload(file.path)
+      )
+    );
+    sectionImageUrls = sectionImageUploads.map((upload) => upload.secure_url);
+  }
 
   const blogId = req.params.id;
   const existingBlog = await Blog.findByPk(blogId);
   if (!existingBlog) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: "Blog not found",
     });
   }
+
+  // Update existing blog properties
   existingBlog.title = req.body.title ? req.body.title : existingBlog.blogName;
   existingBlog.content = req.body.content
     ? req.body.content
@@ -126,47 +140,68 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     : existingBlog.blogDescription;
   existingBlog.slug = req.body.slug ? req.body.slug : existingBlog.slug;
   existingBlog.blogImage = blogImageUrl ? blogImageUrl : existingBlog.blogImage;
-  let sectionData;
-  let sectionImageUrls = [];
-  if (req.body.sections && req.files.sectionImages) {
-    const sectionImageUploads = await Promise.all(
-      req.files.sectionImages.map((file) =>
-        cloudinary.uploader.upload(file.path)
-      )
-    );
-    sectionImageUrls = sectionImageUploads.map((upload) => upload.secure_url);
+
+  if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
-    sectionData = JSON.parse(existingBlog.sections).map((section, i) => {
+    sectionData = JSON.parse(existingBlog.sections).map((section) => {
       let existingSection = section;
       const id = existingSection.id;
 
-      newSections.map((section, i) => {
-        if (id == section.id) {
-          existingSection.name = section.name
-            ? section.name
+      newSections.forEach((newSection, i) => {
+        if (id === newSection.id) {
+          existingSection.name = newSection.name
+            ? newSection.name
             : existingSection.name;
-          existingSection.text = section.text
-            ? section.text
+          existingSection.text = newSection.text
+            ? newSection.text
             : existingSection.text;
-          if (req.files.sectionImages.length > 0) {
-            console.log("old:", existingSection.image);
+
+          if (
+            req.files.sectionImages &&
+            req.files.sectionImages.length > 0 &&
+            sectionImageUrls[i]
+          ) {
             existingSection.image = sectionImageUrls[i];
-            console.log("new:", existingSection.image);
           }
         }
       });
+
       return { ...existingSection };
     });
   }
 
-  existingBlog.sections = sectionData ? sectionData : existingBlog.sections;
-  const newBlog = await existingBlog.save();
-  res.json({
-    success: true,
-    message: "Blog updated successfully",
-    newBlog,
-    // existingBlog,
-  });
+  existingBlog.sections = sectionData.length
+    ? sectionData
+    : existingBlog.sections;
+  try {
+    const newBlog = await existingBlog.save();
+
+    res.json({
+      success: true,
+      message: "Blog updated successfully",
+      newBlog,
+    });
+  } catch (error) {
+    if (blogImageUrl) {
+      const publicId = blogImageUrl.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    if (sectionImageUrls.length > 0) {
+      await Promise.all(
+        sectionImageUrls.map((url) => {
+          const publicId = url.split("/").pop().split(".")[0];
+          return cloudinary.uploader.destroy(publicId);
+        })
+      );
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the blog.",
+      error: error.message,
+    });
+  }
 });
 
 export const deleteSection = CatchAsync(async (req, res, next) => {
