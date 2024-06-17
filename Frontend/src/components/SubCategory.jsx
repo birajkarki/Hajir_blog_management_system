@@ -31,9 +31,8 @@ const SubCategory = () => {
       );
       setCategory(selectedTemplate ? selectedTemplate.Categories : []);
       console.log(selectedTemplate);
-      if(selectedTemplate && selectedTemplate.Categories.length === 0) {
+      if (selectedTemplate && selectedTemplate.Categories.length === 0) {
         getAllSubCategory();
-
       }
       setShowCategories(true);
     } else {
@@ -41,33 +40,28 @@ const SubCategory = () => {
     }
   }, [selectedTemplateId, template]);
 
-  const getAllSubCategory = async (categoryId ) => {
+  const getAllSubCategory = async (categoryId) => {
     // console.log("sub category", categoryId);
     try {
       if (!categoryId) {
         setLoading(true);
-        const res = await ApiRequest.get(
-          `/${selectedTemplateId}/subcategory`
-        );
+        const res = await ApiRequest.get(`/${selectedTemplateId}/subcategory`);
         console.log(res);
         setSubCategory(res.data.subCategories);
         setLoading(false);
-      
-      };
+      }
     } catch (error) {
       console.log(error);
     }
 
     try {
       setLoading(true);
-     
-        const res = await ApiRequest.get(
-          `/${selectedTemplateId}/${categoryId}/subcategory`
-        );
-        setSubCategory(res.data.subCategories);
-        setLoading(false);
-  
-      
+
+      const res = await ApiRequest.get(
+        `/${selectedTemplateId}/${categoryId}/subcategory`
+      );
+      setSubCategory(res.data.subCategories);
+      setLoading(false);
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -101,7 +95,7 @@ const SubCategory = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      if(selectedCategoryId) {
+      if (selectedCategoryId) {
         const newSubCategory = await ApiRequest.post(
           `/${selectedTemplateId}/${selectedCategoryId}/subcategory`,
           {
@@ -109,9 +103,9 @@ const SubCategory = () => {
           }
         );
         setShowCreateSubCategory(false);
-      setSubCategoryName("");
-      toast.success(newSubCategory.data.message);
-      getAllSubCategory(selectedCategoryId);
+        setSubCategoryName("");
+        toast.success(newSubCategory.data.message);
+        getAllSubCategory(selectedCategoryId);
       } else {
         const newSubCategory = await ApiRequest.post(
           `/${selectedTemplateId}/subcategory`,
@@ -120,11 +114,10 @@ const SubCategory = () => {
           }
         );
         setShowCreateSubCategory(false);
-      setSubCategoryName("");
-      toast.success(newSubCategory.data.message);
-      getAllSubCategory(selectedCategoryId);
+        setSubCategoryName("");
+        toast.success(newSubCategory.data.message);
+        getAllSubCategory(selectedCategoryId);
       }
-      
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -174,13 +167,11 @@ const SubCategory = () => {
     // When a template is selected, reset the selected category and subcategory
     setSelectedCategoryId(null);
     // setSubCategory([]);
-
   };
 
   const handleCategorySelect = (categoryId) => {
     setSelectedCategoryId(categoryId);
     getAllSubCategory(categoryId);
-
   };
 
   return (
@@ -235,7 +226,7 @@ const SubCategory = () => {
           </ul>
         )}
       </div>
-{/* -------------------- Create Sub Category Form -------------------------------- */}
+      {/* -------------------- Create Sub Category Form -------------------------------- */}
       {showCreateSubCategory && (
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <form
@@ -261,7 +252,7 @@ const SubCategory = () => {
           </form>
         </div>
       )}
-{/* -------------------- Create Update Category Form -------------------------------- */}
+      {/* -------------------- Create Update Category Form -------------------------------- */}
 
       {showUpdateSubCategory && (
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
