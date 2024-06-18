@@ -6,12 +6,11 @@ import jwt from "jsonwebtoken";
 const protect = CatchAsync(async (req, res, next) => {
   let token;
 
-  // Extract token from authorization header or cookies
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies.jwt) {
+  
     token = req.cookies.jwt;
-  }
+  
+
+  console.log("token", token)
 
   if (!token) {
     return next(new AppError("Not Authorized", 401));
