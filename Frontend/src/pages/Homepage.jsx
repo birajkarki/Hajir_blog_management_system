@@ -112,7 +112,7 @@ const Homepage = () => {
         <aside className="w-full md:w-1/5 bg-white text-gray-900 min-h-screen py-6 px-4 shadow-sm border-r-2">
           <div className="flex flex-col gap-6 px-6">
             <ul className="space-y-6 text-lg">
-              <li
+              {/* <li
                 className={` transition-colors cursor-pointer rounded-md duration-300 ${
                   selectOption === "Template"
                     ? "bg-purple-600 text-white py-2 px-4 "
@@ -142,7 +142,7 @@ const Homepage = () => {
                 onClick={handleShowSubCategory}
               >
                 Sub Category
-              </li>
+              </li> */}
               <li
                 className={` transition-colors cursor-pointer rounded-md duration-100 ${
                   selectOption === "Blog"
@@ -185,10 +185,10 @@ const Homepage = () => {
           </div>
         </aside>
         <main className="flex-1 bg-white p-4 md:p-10 text-gray-800">
-          {showTemplate && <Template />}
+          {/* {showTemplate && <Template />} */}
           {showBlog && <Blog />}
-          {showCategory && <Category />}
-          {showSubCategory && <SubCategory />}
+          {/* {showCategory && <Category />} */}
+          {/* {showSubCategory && <SubCategory />} */}
           {showPrivacyAndPolicy && <PrivacyPolicy />}
           {showTNC && <TermsAndCondition />}
         </main>

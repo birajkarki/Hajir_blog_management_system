@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { loginSchema } from "../schemas";
 import ApiRequest from "../utils/apiRequest";
@@ -16,30 +16,25 @@ const Login = () => {
     password: "",
   };
 
-  const {
-    values,
-    errors,
-    touched,
-    handleBlur,
-    handleChange,
-    handleSubmit,
-  } = useFormik({
-    initialValues: initialValues,
-    validationSchema: loginSchema,
-    onSubmit: async (values) => {
-      try {
-        const req = await ApiRequest.post("/user/login", values);
-        setIsAuthenticated(true);
-        navigate("/");
-        toast.success(req.data.message);
-      } catch (error) {
-        toast.error(error.response.data.message);
-      }
-    },
-  });
+  const { values, errors, touched, handleBlur, handleChange, handleSubmit } =
+    useFormik({
+      initialValues: initialValues,
+      validationSchema: loginSchema,
+      onSubmit: async (values) => {
+        try {
+          const req = await ApiRequest.post("/user/login", values);
+          setIsAuthenticated(true);
+          navigate("/");
+          toast.success(req.data.message);
+        } catch (error) {
+          toast.error(error.response.data.message);
+        }
+      },
+    });
 
   const handleRegister = () => {
-    navigate("/register");
+    // navigate("/register");
+
   };
 
   const handleForgetPassword = () => {
@@ -51,9 +46,6 @@ const Login = () => {
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
-
-
-  
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -100,21 +92,24 @@ const Login = () => {
           </button>
         </form>
         <div className="mt-6 text-center">
+          <h1 className="text-base font-semibold text-red-900 text-center">
+            *Only admins can access this page
+          </h1>
           <p className="text-sm text-gray-700">
             Don't have an account?{" "}
-            <button
+            <Link to='https://www.youtube.com/watch?v=dQw4w9WgXcQ'><span
               className="text-indigo-500 font-semibold hover:underline"
-              onClick={handleRegister}
+            
             >
               Register
-            </button>
+            </span></Link>
           </p>
-          <button
+          {/*<button
             className="text-indigo-500 text-sm mt-2 hover:underline"
             onClick={handleForgetPassword}
           >
             Forgot password?
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
