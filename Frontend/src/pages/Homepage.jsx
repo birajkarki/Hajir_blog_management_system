@@ -21,14 +21,13 @@ const Homepage = () => {
   const [showTNC, setShowTNC] = useState(false);
   const [selectOption, setSelectOption] = useState("Template");
 
-
   const handleShowTemplate = () => {
     setSelectOption("Template");
     setShowTemplate(true);
     setShowBlog(false);
     setShowCategory(false);
     setShowSubCategory(false);
-    setShowPrivacyAndPolicy(false)
+    setShowPrivacyAndPolicy(false);
     setShowTNC(false);
   };
   const handleShowBlog = () => {
@@ -37,7 +36,7 @@ const Homepage = () => {
     setShowBlog(true);
     setShowCategory(false);
     setShowSubCategory(false);
-    setShowPrivacyAndPolicy(false)
+    setShowPrivacyAndPolicy(false);
     setShowTNC(false);
   };
   const handleShowCategory = () => {
@@ -46,7 +45,7 @@ const Homepage = () => {
     setShowBlog(false);
     setShowCategory(true);
     setShowSubCategory(false);
-    setShowPrivacyAndPolicy(false)
+    setShowPrivacyAndPolicy(false);
     setShowTNC(false);
   };
   const handleShowSubCategory = () => {
@@ -55,7 +54,7 @@ const Homepage = () => {
     setShowBlog(false);
     setShowCategory(false);
     setShowSubCategory(true);
-    setShowPrivacyAndPolicy(false)
+    setShowPrivacyAndPolicy(false);
     setShowTNC(false);
   };
   const handleShowPrivacyAndPolicy = () => {
@@ -63,15 +62,15 @@ const Homepage = () => {
     setShowBlog(false);
     setShowCategory(false);
     setShowSubCategory(false);
-    setShowPrivacyAndPolicy(true)
+    setShowPrivacyAndPolicy(true);
     setShowTNC(false);
   };
   const handleShowTNC = () => {
     setShowTemplate(false);
     setShowBlog(false);
     setShowCategory(false);
-    setShowSubCategory(true);
-    setShowPrivacyAndPolicy(false)
+    setShowSubCategory(false);
+    setShowPrivacyAndPolicy(false);
     setShowTNC(true);
   };
 
