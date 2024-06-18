@@ -8,10 +8,8 @@ const generateJsonWebToken = (id) => {
 
 const createSendToken = (user, message, statusCode, res) => {
   const token = generateJsonWebToken(user.id);
-<<<<<<< HEAD
-=======
 
->>>>>>> b778e9fe03a3dd69e4632fbe8d51fbe22e59296e
+
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
