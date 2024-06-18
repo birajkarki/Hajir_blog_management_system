@@ -92,7 +92,6 @@ export const resetPassword = CatchAsync(async (req, res, next) => {
       resetPasswordExpires: { [Op.gt]: Date.now() },
     },
   });
-
   if (!user) {
     return next(new AppError("Token Expired or Invalid!", 404));
   }
@@ -152,7 +151,7 @@ export const getUser = CatchAsync(async (req, res, next) => {
 });
 
 export const getMe = CatchAsync(async (req, res, next) => {
-  // console.log(req.user);
+  console.log(req.user);
   req.params.id = req.user.dataValues.id;
   next();
 });

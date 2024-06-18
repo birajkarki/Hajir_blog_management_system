@@ -7,6 +7,7 @@ const protect = CatchAsync(async (req, res, next) => {
   let token;
 
   token = req.cookies.jwt;
+ 
 
   if (!token) {
     return next(new AppError("Not Authorized", 400));

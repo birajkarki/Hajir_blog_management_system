@@ -58,6 +58,7 @@ const Homepage = () => {
     setShowTNC(false);
   };
   const handleShowPrivacyAndPolicy = () => {
+    setSelectOption("Privacy and Policy");
     setShowTemplate(false);
     setShowBlog(false);
     setShowCategory(false);
@@ -66,6 +67,7 @@ const Homepage = () => {
     setShowTNC(false);
   };
   const handleShowTNC = () => {
+    setSelectOption("Terms and Conditions");
     setShowTemplate(false);
     setShowBlog(false);
     setShowCategory(false);
@@ -153,7 +155,7 @@ const Homepage = () => {
               </li>
               <li
                 className={` transition-colors cursor-pointer rounded-md duration-100 ${
-                  selectOption === "Blog"
+                  selectOption === "Privacy and Policy"
                     ? "bg-purple-600 text-white py-2 px-4 "
                     : ""
                 }`}
@@ -163,7 +165,7 @@ const Homepage = () => {
               </li>
               <li
                 className={` transition-colors cursor-pointer rounded-md duration-100 ${
-                  selectOption === "Blog"
+                  selectOption === "Terms and Conditions"
                     ? "bg-purple-600 text-white py-2 px-4 "
                     : ""
                 }`}
