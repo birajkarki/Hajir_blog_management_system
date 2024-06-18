@@ -24,7 +24,11 @@ app.use(
       "http://localhost:5173",
       "http://localhost:3000",
       "https://backendhajir-blogmanagement.onrender.com",
+<<<<<<< HEAD
       "https://hajir-blog-management-system-f5gh.vercel.app",
+=======
+      "https://hajir-blog-management-system-f5gh.vercel.app"
+>>>>>>> b778e9fe03a3dd69e4632fbe8d51fbe22e59296e
     ],
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     credentials: true,
