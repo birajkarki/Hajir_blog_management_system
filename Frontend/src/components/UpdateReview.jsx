@@ -97,7 +97,7 @@ const UpdateReview = ({ reviewId, onCreateSuccess, handleCancel }) => {
           className="w-full px-4 py-2 mb-4 border rounded-md"
         />
         <input
-          type="number"
+          type="text"
           value={ratings}
           onChange={(e) => setRatings(e.target.value)}
           placeholder="Rating"

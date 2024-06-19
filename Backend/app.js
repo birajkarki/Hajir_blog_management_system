@@ -12,6 +12,7 @@ import highlightRoute from "./routes/highlight.routes.js";
 import reviewRoute from "./routes/review.route.js";
 import ppRoute from "./routes/privacypolicy.route.js";
 import tncRoute from "./routes/termsandcondtion.route.js";
+import mailRoute from "./routes/mail.route.js";
 import globalErrorHandler from "./controllers/error.controller.js";
 import extractObj from "./middlewares/extract.js";
 
@@ -59,6 +60,7 @@ app.use("/api/v1/:blogId/highlight", extractObj, highlightRoute);
 app.use("/api/v1/review", reviewRoute);
 app.use("/api/v1/privacy-policy", ppRoute);
 app.use("/api/v1/terms-and-conditions", tncRoute);
+app.use("/api/v1/mail", mailRoute);
 app.use(globalErrorHandler);
 
 export default app;
