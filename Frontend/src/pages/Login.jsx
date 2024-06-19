@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { loginSchema } from "../schemas";
-import ApiRequest from "../utils/apiRequest";
+import ApiRequest from "../utils/apiRequests";
 import { toast } from "react-toastify";
 import { useContext, useEffect } from "react";
 import { Context } from "../context/Context";

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import ApiRequest from "../utils/apiRequest";
 import { FiDelete } from "react-icons/fi";
 import { RxUpdate } from "react-icons/rx";
 import CreateBlogForm from "./CreateBlogForm";
 import { toast } from "react-toastify";
 import UpdateBlogForm from "./UpdateBlogForm";
 import ShowBlog from "./ShowBlog";
+import ApiRequest from "../utils/apiRequests";
 
 const Blog = () => {
   const [blogs, setBlogs] = useState([]);

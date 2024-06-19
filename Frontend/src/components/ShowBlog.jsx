@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import ApiRequest from "../utils/apiRequest";
 import { toast } from "react-toastify";
+import ApiRequest from "../utils/apiRequests";
 
 const ShowBlog = ({
   selectedTemplateId,

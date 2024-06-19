@@ -1,8 +1,8 @@
 import { useFormik } from "formik";
 import { forgetSchema } from "../schemas";
-import ApiRequest from '../utils/apiRequest';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import ApiRequest from "../utils/apiRequests";
 
 const ForgetPassword = () => {
 

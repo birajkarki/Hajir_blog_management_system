@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import ApiRequest from "../utils/apiRequest";
 import { toast } from "react-toastify";
 import "quill/dist/quill.core.css"; // Import Quill core CSS
+import ApiRequest from "../utils/apiRequests";
 
 const PrivacyPolicy = () => {
   const [value, setValue] = useState("");

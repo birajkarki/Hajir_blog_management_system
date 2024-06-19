@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import ApiRequest from '../utils/apiRequest';
+import ApiRequest from "../utils/apiRequests";
 
 export const Context = createContext({
   isAuthenticated: false,
@@ -17,4 +17,3 @@ export const ContextProvider = ({ children }) => {
     </Context.Provider>
   );
 };
-

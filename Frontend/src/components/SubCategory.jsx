@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import ApiRequest from "../utils/apiRequest";
 import { RxUpdate } from "react-icons/rx";
 import { FiDelete } from "react-icons/fi";
 import { toast } from "react-toastify";
+import ApiRequest from "../utils/apiRequests";
 
 const SubCategory = () => {
   const [subCategory, setSubCategory] = useState([]);

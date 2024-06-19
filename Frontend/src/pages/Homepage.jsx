@@ -7,9 +7,11 @@ import Category from "../components/Category";
 import SubCategory from "../components/SubCategory";
 import Template from "../components/Template";
 import { Context } from "../context/Context";
-import ApiRequest from "../utils/apiRequest";
+
 import PrivacyPolicy from "../components/PrivacyPolicy";
 import TermsAndCondition from "../components/TermsAndCondition";
+import Review from "../components/Review";
+import ApiRequest from "../utils/apiRequests";
 
 const Homepage = () => {
   const { user, isAuthenticated, setIsAuthenticated } = useContext(Context);
@@ -19,6 +21,7 @@ const Homepage = () => {
   const [showSubCategory, setShowSubCategory] = useState(false);
   const [showPrivacyAndPolicy, setShowPrivacyAndPolicy] = useState(false);
   const [showTNC, setShowTNC] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
   const [selectOption, setSelectOption] = useState("Template");
 
   const handleShowTemplate = () => {
@@ -29,6 +32,7 @@ const Homepage = () => {
     setShowSubCategory(false);
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
+    setShowReviews(false);
   };
   const handleShowBlog = () => {
     setSelectOption("Blog");
@@ -38,6 +42,7 @@ const Homepage = () => {
     setShowSubCategory(false);
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
+    setShowReviews(false);
   };
   const handleShowCategory = () => {
     setSelectOption("Category");
@@ -47,6 +52,7 @@ const Homepage = () => {
     setShowSubCategory(false);
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
+    setShowReviews(false);
   };
   const handleShowSubCategory = () => {
     setSelectOption("Sub-Category");
@@ -56,6 +62,7 @@ const Homepage = () => {
     setShowSubCategory(true);
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
+    setShowReviews(false);
   };
   const handleShowPrivacyAndPolicy = () => {
     setSelectOption("Privacy and Policy");
@@ -65,6 +72,7 @@ const Homepage = () => {
     setShowSubCategory(false);
     setShowPrivacyAndPolicy(true);
     setShowTNC(false);
+    setShowReviews(false);
   };
   const handleShowTNC = () => {
     setSelectOption("Terms and Conditions");
@@ -74,6 +82,17 @@ const Homepage = () => {
     setShowSubCategory(false);
     setShowPrivacyAndPolicy(false);
     setShowTNC(true);
+    setShowReviews(false);
+  };
+  const handleShowReviews = () => {
+    setSelectOption("Review");
+    setShowTemplate(false);
+    setShowBlog(false);
+    setShowCategory(false);
+    setShowSubCategory(false);
+    setShowPrivacyAndPolicy(false);
+    setShowTNC(false);
+    setShowReviews(true);
   };
 
   const navigate = useNavigate();
@@ -173,6 +192,16 @@ const Homepage = () => {
               >
                 Terms and Condition
               </li>
+              <li
+                className={` transition-colors cursor-pointer rounded-md duration-100 ${
+                  selectOption === "Review"
+                    ? "bg-purple-600 text-white py-2 px-4 "
+                    : ""
+                }`}
+                onClick={handleShowReviews}
+              >
+                Reviews
+              </li>
             </ul>
             <div className="mt-10">
               <button
@@ -191,6 +220,7 @@ const Homepage = () => {
           {/* {showSubCategory && <SubCategory />} */}
           {showPrivacyAndPolicy && <PrivacyPolicy />}
           {showTNC && <TermsAndCondition />}
+          {showReviews && <Review />}
         </main>
       </div>
     </div>

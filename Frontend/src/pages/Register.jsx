@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { registerSchema } from "../schemas";
 import { useFormik } from "formik";
 import { useEffect } from 'react';
-import ApiRequest from '../utils/apiRequest';
 import { toast } from 'react-toastify';
+import ApiRequest from "../utils/apiRequests";
 
 const Register = () => {
   const initialValues = {

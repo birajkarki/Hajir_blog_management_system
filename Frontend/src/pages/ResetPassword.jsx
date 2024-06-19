@@ -1,8 +1,8 @@
 import { useFormik } from "formik";
 import {  resetSchema } from "../schemas";
-import ApiRequest from '../utils/apiRequest';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
+import ApiRequest from "../utils/apiRequests";
 
 const ResetPassword = () => {
   const {token} = useParams();

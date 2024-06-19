@@ -8,7 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useContext, useEffect } from "react";
 import { Context } from "./context/Context";
-import ApiRequest from "./utils/apiRequest";
+import ApiRequest from "./utils/apiRequests";
 
 const App = () => {
   const { isAuthenticated, setIsAuthenticated, setUser } = useContext(Context);
@@ -36,7 +36,7 @@ const App = () => {
         <Route path="/forget" element={<ForgetPassword />} />
         <Route path="/password/reset/:token" element={<ResetPassword />} />
       </Routes>
-      <ToastContainer position='top-center' />
+      <ToastContainer position="top-center" />
     </Router>
   );
 };

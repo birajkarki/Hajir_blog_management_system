@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import Quill from "quill"; // Import Quill library
 import "quill/dist/quill.snow.css"; // Import Quill's snow theme CSS
-import ApiRequest from "../utils/apiRequest";
 import { toast } from "react-toastify";
+import ApiRequest from "../utils/apiRequests";
 
 const TermsAndConditions = () => {
   const [editorHtml, setEditorHtml] = useState(""); // State to store editor HTML content
