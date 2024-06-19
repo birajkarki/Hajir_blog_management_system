@@ -100,7 +100,7 @@ const Review = () => {
       {!showUpdateReview && !showCreateReview && (
         <div className="rounded-lg p-6 mb-6">
           {showReviews && (
-            <div className="flex flex-col lg:flex-row justify-evenly items-center gap-4 flex-wrap">
+            <div className="flex flex-col lg:flex-row  items-center gap-4 flex-wrap">
               {reviews.length > 0 ? (
                 reviews.map((review) => (
                   <div
