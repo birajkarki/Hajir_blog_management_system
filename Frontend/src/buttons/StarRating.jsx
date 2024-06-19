@@ -14,7 +14,7 @@ const StarRating = ({ rating }) => {
         key={index}
         xmlns="http://www.w3.org/2000/svg"
         className={`h-6 w-6 ${
-          isFilled ? 'text-yellow-400' : isHalfFilled ? 'text-yellow-400 half-filled' : 'hidden'
+          isFilled ? 'text-orange-400' : isHalfFilled ? 'text-orange-400 half-filled' : 'hidden'
         }`}
         fill={isFilled || isHalfFilled ? 'currentColor' : 'none'}
         viewBox="0 0 24 24"
