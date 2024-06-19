@@ -34,7 +34,6 @@ const Login = () => {
 
   const handleRegister = () => {
     // navigate("/register");
-
   };
 
   const handleForgetPassword = () => {
@@ -93,16 +92,15 @@ const Login = () => {
         </form>
         <div className="mt-6 text-center">
           <h1 className="text-base font-semibold text-red-900 text-center">
-            *Only admins can access this page
+            *Only admins can Login through this page
           </h1>
           <p className="text-sm text-gray-700">
             Don't have an account?{" "}
-            <Link to='https://www.youtube.com/watch?v=dQw4w9WgXcQ'><span
-              className="text-indigo-500 font-semibold hover:underline"
-            
-            >
-              Register
-            </span></Link>
+            <Link to="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+              <span className="text-indigo-500 font-semibold hover:underline">
+                Register
+              </span>
+            </Link>
           </p>
           {/*<button
             className="text-indigo-500 text-sm mt-2 hover:underline"
