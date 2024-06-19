@@ -133,6 +133,9 @@ export const logoutUser = CatchAsync(async (req, res, next) => {
     .cookie("jwt", " ", {
       httpOnly: true,
       expires: new Date(Date.now()),
+      secure: true,
+      overwrite: true,
+      sameSite: "none",
     })
     .json({
       success: true,
