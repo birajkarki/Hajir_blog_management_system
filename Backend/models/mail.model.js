@@ -1,33 +1,25 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../database/database.js";
 
-const Reviews = sequelize.define(
-  "Reviews",
+const Mail = sequelize.define(
+  "Mail",
   {
-    reviewText: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    region: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    ratings: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    image: {
+    message: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
-    tableName: "Reviews",
+    tableName: "Mail",
   }
 );
 
-export default Reviews;
+export default Mail;

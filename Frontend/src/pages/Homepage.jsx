@@ -12,6 +12,7 @@ import PrivacyPolicy from "../components/PrivacyPolicy";
 import TermsAndCondition from "../components/TermsAndCondition";
 import Review from "../components/Review";
 import ApiRequest from "../utils/apiRequests";
+import Messages from '../components/Messages';
 
 const Homepage = () => {
   const { user, isAuthenticated, setIsAuthenticated } = useContext(Context);
@@ -22,7 +23,8 @@ const Homepage = () => {
   const [showPrivacyAndPolicy, setShowPrivacyAndPolicy] = useState(false);
   const [showTNC, setShowTNC] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
-  const [selectOption, setSelectOption] = useState("Template");
+  const [showMessages, setShowMessages] = useState(false);
+  const [selectOption, setSelectOption] = useState("Blog");
 
   const handleShowTemplate = () => {
     setSelectOption("Template");
@@ -33,6 +35,7 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
     setShowReviews(false);
+    setShowMessages(false);
   };
   const handleShowBlog = () => {
     setSelectOption("Blog");
@@ -43,6 +46,7 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
     setShowReviews(false);
+    setShowMessages(false);
   };
   const handleShowCategory = () => {
     setSelectOption("Category");
@@ -53,6 +57,7 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
     setShowReviews(false);
+    setShowMessages(false);
   };
   const handleShowSubCategory = () => {
     setSelectOption("Sub-Category");
@@ -63,6 +68,7 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
     setShowReviews(false);
+    setShowMessages(false);
   };
   const handleShowPrivacyAndPolicy = () => {
     setSelectOption("Privacy and Policy");
@@ -73,6 +79,7 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(true);
     setShowTNC(false);
     setShowReviews(false);
+    setShowMessages(false);
   };
   const handleShowTNC = () => {
     setSelectOption("Terms and Conditions");
@@ -83,6 +90,7 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(false);
     setShowTNC(true);
     setShowReviews(false);
+    setShowMessages(false);
   };
   const handleShowReviews = () => {
     setSelectOption("Review");
@@ -93,7 +101,21 @@ const Homepage = () => {
     setShowPrivacyAndPolicy(false);
     setShowTNC(false);
     setShowReviews(true);
+    setShowMessages(false);
+
   };
+
+  const handleShowMessages = () => {
+    setSelectOption("Messages");
+    setShowTemplate(false);
+    setShowBlog(false);
+    setShowCategory(false);
+    setShowSubCategory(false);
+    setShowPrivacyAndPolicy(false);
+    setShowTNC(false);
+    setShowReviews(false);
+    setShowMessages(true);
+  }
 
   const navigate = useNavigate();
 
@@ -202,6 +224,16 @@ const Homepage = () => {
               >
                 Reviews
               </li>
+              <li
+                className={` transition-colors cursor-pointer rounded-md duration-100 ${
+                  selectOption === "Messages"
+                    ? "bg-purple-600 text-white py-2 px-4 "
+                    : ""
+                }`}
+                onClick={handleShowMessages}
+              >
+                Messages
+              </li>
             </ul>
             <div className="mt-10">
               <button
@@ -215,12 +247,13 @@ const Homepage = () => {
         </aside>
         <main className="flex-1 bg-white p-4 md:p-10 text-gray-800">
           {/* {showTemplate && <Template />} */}
-          {showBlog && <Blog />}
+          {selectOption==='Blog' && <Blog />}
           {/* {showCategory && <Category />} */}
           {/* {showSubCategory && <SubCategory />} */}
           {showPrivacyAndPolicy && <PrivacyPolicy />}
           {showTNC && <TermsAndCondition />}
           {showReviews && <Review />}
+          {showMessages && <Messages />}
         </main>
       </div>
     </div>

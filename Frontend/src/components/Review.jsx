@@ -5,6 +5,7 @@ import ApiRequest from "../utils/apiRequests";
 import StarRating from "../buttons/StarRating";
 import CreateReview from "./CreateReview";
 import UpdateReview from "./UpdateReview";
+import { toast } from "react-toastify"; // Assuming you are using react-toastify for toast notifications
 
 const Review = () => {
   const [showReviews, setShowReviews] = useState(true);
@@ -13,7 +14,6 @@ const Review = () => {
   const [error, setError] = useState(null);
   const [showCreateReview, setShowCreateReview] = useState(false);
   const [showUpdateReview, setShowUpdateReview] = useState(false);
-  const [showDeleteReview, setShowDeleteReview] = useState(false);
   const [updateReviewId, setUpdateReviewId] = useState(null);
 
   useEffect(() => {
@@ -39,11 +39,6 @@ const Review = () => {
     }
   };
 
-  const handleReviewShow = (id) => {
-    setReviewId(id);
-    setShowReviews(!showReviews);
-  };
-
   const handleShowCreateReview = () => {
     setShowCreateReview(!showCreateReview);
   };
@@ -57,16 +52,16 @@ const Review = () => {
     try {
       await ApiRequest.delete(`/review/${review.id}`);
 
+      // Show toast notification
       toast.success("Review Deleted Successfully");
+
+      // Refetch all reviews to update the list
       fetchAllReviews();
     } catch (error) {
       console.error("Failed to delete review:", error);
+      toast.error("Failed to delete review");
     }
   };
-
-  useEffect(() => {
-    fetchAllReviews();
-  },[handleDeleteReview])
 
   const handleCreateSuccess = () => {
     setShowCreateReview(false);
@@ -77,7 +72,6 @@ const Review = () => {
   const handleUpdateReview = (review) => {
     setUpdateReviewId(review.id);
     setShowUpdateReview(true);
-    fetchAllReviews();
   };
 
   return (
@@ -103,18 +97,15 @@ const Review = () => {
           handleCancel={handleCancelShowUpdate}
         />
       )}
-      {showDeleteReview && (
-        <CreateReview onCreateSuccess={handleCreateSuccess} />
-      )}
       {!showUpdateReview && !showCreateReview && (
         <div className="rounded-lg p-6 mb-6">
           {showReviews && (
-            <div className="flex flex-col lg:flex-row justify-evenly items-center gap-4 flex-wrap">
+            <div className="flex flex-col lg:flex-row  gap-3 flex-wrap">
               {reviews.length > 0 ? (
                 reviews.map((review) => (
                   <div
                     key={review.id}
-                    className="bg-white  shadow-md rounded-lg overflow-hidden cursor-pointer p-4"
+                    className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer p-4"
                   >
                     <div className="flex flex-col gap-4">
                       <div className="flex justify-center">
