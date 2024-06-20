@@ -28,6 +28,7 @@ app.use(
       "https://hajir-blog-management-system-f5gh.vercel.app",
       "https://hajir-website.vercel.app",
       "https://hajirapp.com",
+      "https://www.hajirapp.com/",
       "https://admin.hajirapp.com",
       "https://api.hajirapp.com",
       "https://api.hajirapp.com",
