@@ -21,19 +21,7 @@ const app = express();
 // MIDDLEWARES
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "https://backendhajir-blogmanagement.onrender.com",
-      "https://hajir-blog-management-system-f5gh.vercel.app",
-      "https://hajir-website.vercel.app",
-      "https://hajirapp.com",
-      "https://www.hajirapp.com/",
-      "https://admin.hajirapp.com",
-      "https://api.hajirapp.com",
-      "https://api.hajirapp.com",
-      "https://hajir-blog-management-system.onrender.com",
-    ],
+    origin: true, // Allow all origins
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     credentials: true,
   })
