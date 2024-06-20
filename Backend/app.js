@@ -27,10 +27,6 @@ app.use(
       "https://backendhajir-blogmanagement.onrender.com",
       "https://hajir-blog-management-system-f5gh.vercel.app",
       "https://hajir-website.vercel.app",
-<<<<<<< HEAD
-=======
-      "https://hajir-blog-management-system.vercel.app",
->>>>>>> 44a088b6d23e44845d1088fa6ff7982ff77ef56e
     ],
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     credentials: true,
