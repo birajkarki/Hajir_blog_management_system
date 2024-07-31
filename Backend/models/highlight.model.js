@@ -8,7 +8,7 @@ const Highlight = sequelize.define("Highlight", {
     allowNull: false,
   },
   highlightDescription: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   highlightSections: {

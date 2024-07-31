@@ -4,7 +4,7 @@ import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 
 export const createMail = CatchAsync(async (req, res, next) => {
-  const { name, email, message } = req.body;
+  const { name, email, message, phone } = req.body;
   if (!name || !email || !message) {
     return next(new AppError("Please fill the form completely"));
   }
@@ -12,6 +12,7 @@ export const createMail = CatchAsync(async (req, res, next) => {
     name,
     email,
     message,
+    phone,
   });
   res.status(200).json({
     success: true,
