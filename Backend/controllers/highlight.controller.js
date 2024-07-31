@@ -16,20 +16,40 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
     return next(new AppError("Highlight sections cannot be empty"), 404);
   }
   sectionData = highlightSections.map((value, i) => {
-    const { title, description } = value;
+    const {
+      title,
+      description,
+      highlightImageAltText,
+      highlightImageDescription,
+      highlightImageCaption,
+    } = value;
     const image = imageUrls[i];
     const id = i + 1;
-    return { id, title, description, image };
+    return {
+      id,
+      title,
+      description,
+      image,
+      highlightImageAltText,
+      highlightImageDescription,
+      highlightImageCaption,
+    };
   });
   highlightSections = sectionData;
   //   console.log(highlightSections);
   try {
-    const highlight = await Highlight.create({
+    res.json({
       highlightTitle,
       highlightDescription,
       highlightSections,
       blogId,
     });
+    // const highlight = await Highlight.create({
+    //   highlightTitle,
+    //   highlightDescription,
+    //   highlightSections,
+    //   blogId,
+    // });
     highlight.highlightSections = highlight.highlightSections.map((section) => {
       section.image = `${req.protocol}://${req.get("host")}/uploads/${
         section.image

@@ -22,6 +22,9 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     slug: req.body.slug.replace(/\s+/g, "-").toLowerCase(),
     blogImage: `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`,
     sections: req.body.sections,
+    blogImageAltText: req.body.blogImageAltText,
+    blogImageDescription: req.body.blogImageDescription,
+    blogImageCaption: req.body.blogImageCaption,
   };
   const sections = JSON.parse(blog.sections);
   if (!sections) {
@@ -29,25 +32,35 @@ export const createBlog = CatchAsync(async (req, res, next) => {
   }
   const sectionsData = sections.map((value, i) => {
     if (i !== sections.length) {
-      const { name, text } = value;
-      const image = sectionImageUrls[i];
+      const {
+        name,
+        text,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      } = value;
+      const image = `${req.protocol}://${req.get("host")}/uploads/${
+        sectionImageUrls[i]
+      }`;
       const id = i + 1;
-      return { id, name, text, image };
+      return {
+        id,
+        name,
+        text,
+        image,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      };
     }
   });
   blog.sections = sectionsData;
   try {
-    const _blog = await Blog.create(blog);
-    _blog.sections = blog.sections.map((section) => {
-      section.image = `${req.protocol}://${req.get("host")}/uploads/${
-        section.image
-      }`;
-      return section;
-    });
+    const _newBlog = await Blog.create(blog);
     res.status(201).json({
       success: true,
       message: "Blog Created Successfully",
-      blog: _blog,
+      blog: _newBlog,
     });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });
@@ -114,11 +127,10 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   if (req.body.sections && req.files && req.files.sectionImages) {
     sectionImageUrls = await Promise.all(
       req.files.sectionImages.map((file) => {
-        return file.filename;
+        return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
       })
     );
   }
-
   const blogId = req.params.id;
   const existingBlog = await Blog.findByPk(blogId);
   if (!existingBlog) {
@@ -140,28 +152,52 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     ? req.body.blogDescription
     : existingBlog.blogDescription;
   existingBlog.slug = req.body.slug ? req.body.slug : existingBlog.slug;
-  existingBlog.blogImage = blogImageUrl ? blogImageUrl : existingBlog.blogImage;
+  existingBlog.blogImage = blogImageUrl
+    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
+    : existingBlog.blogImage;
+  existingBlog.blogImageAltText = req.body.blogImageAltText
+    ? req.body.blogImageAltText
+    : existingBlog.blogImageAltText;
+  existingBlog.blogImageDescription = req.body.blogImageDescription
+    ? req.body.blogImageDescription
+    : existingBlog.blogImageDescription;
+  existingBlog.blogImageCaption = req.body.blogImageCaption
+    ? req.body.blogImageCaption
+    : existingBlog.blogImageCaption;
 
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
     sectionData = JSON.parse(existingBlog.sections).map((section) => {
       let existingSection = section;
       const id = existingSection.id;
-
       newSections.forEach((newSection, i) => {
         if (id === newSection.id) {
+          console.log(id, newSection.id);
           existingSection.name = newSection.name
             ? newSection.name
             : existingSection.name;
           existingSection.text = newSection.text
             ? newSection.text
             : existingSection.text;
+          existingSection.sectionImageAltText = newSection.sectionImageAltText
+            ? newSection.sectionImageAltText
+            : existingSection.sectionImageAltText;
+          existingSection.sectionImageDescription =
+            newSection.sectionImageDescription
+              ? newSection.sectionImageDescription
+              : existingSection.sectionImageDescription;
+          existingSection.sectionImageCaption = newSection.sectionImageCaption
+            ? newSection.sectionImageCaption
+            : existingSection.sectionImageCaption;
 
+          // console.log(sectionImageUrls[i+1]);
           if (
             req.files.sectionImages &&
             req.files.sectionImages.length > 0 &&
             sectionImageUrls[i]
           ) {
+            // existingSection.image = sectionImageUrls[i];
+            console.log(sectionImageUrls);
             existingSection.image = sectionImageUrls[i];
           }
         }
