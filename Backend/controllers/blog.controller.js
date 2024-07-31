@@ -1,20 +1,15 @@
 import Blog from "../models/blog.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
-import cloudinary from "cloudinary";
+import { deleteFiles } from "../utils/deleteFiles.js";
 
 export const createBlog = CatchAsync(async (req, res, next) => {
-  const blogImageUpload = await cloudinary.uploader.upload(
-    req.files.blogImage[0].path
+  const blogImageUrl = req.files.blogImage[0].filename;
+  const sectionImageUrls = await Promise.all(
+    req.files.sectionImages.map((file) => {
+      return file.filename;
+    })
   );
-  const blogImageUrl = blogImageUpload.secure_url;
-  const sectionImageUploads = await Promise.all(
-    req.files.sectionImages.map((file) => cloudinary.uploader.upload(file.path))
-  );
-  const sectionImageUrls = sectionImageUploads.map(
-    (upload) => upload.secure_url
-  );
-
   const blog = {
     blogName: req.body.blogName,
     blogDescription: req.body.blogDescription,
@@ -24,15 +19,14 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     titleTag: req.body.titleTag,
     ...req.obj,
     status: "draft",
-    slug: req.body.slug,
-    blogImage: blogImageUrl,
+    slug: req.body.slug.replace(/\s+/g, "-").toLowerCase(),
+    blogImage: `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`,
     sections: req.body.sections,
   };
   const sections = JSON.parse(blog.sections);
   if (!sections) {
     return next(new AppError("Section cannot be empty!", 404));
   }
-
   const sectionsData = sections.map((value, i) => {
     if (i !== sections.length) {
       const { name, text } = value;
@@ -44,29 +38,24 @@ export const createBlog = CatchAsync(async (req, res, next) => {
   blog.sections = sectionsData;
   try {
     const _blog = await Blog.create(blog);
+    _blog.sections = blog.sections.map((section) => {
+      section.image = `${req.protocol}://${req.get("host")}/uploads/${
+        section.image
+      }`;
+      return section;
+    });
     res.status(201).json({
       success: true,
       message: "Blog Created Successfully",
       blog: _blog,
     });
   } catch (error) {
-    if (blogImageUrl) {
-      const publicId = blogImageUrl.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(publicId);
-    }
-
-    if (sectionImageUrls.length > 0) {
-      await Promise.all(
-        sectionImageUrls.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
-          return cloudinary.uploader.destroy(publicId);
-        })
-      );
-    }
-    res.status(409).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(409).json({ success: false, message: error.message });
+    const filesToDelete = [
+      req.files.blogImage[0].filename,
+      ...req.files.sectionImages.map((file) => file.filename),
+    ];
+    await deleteFiles(filesToDelete);
   }
 });
 
@@ -98,24 +87,36 @@ export const getBlogID = CatchAsync(async (req, res, next) => {
   });
 });
 
+export const getBlogBySlug = CatchAsync(async (req, res, next) => {
+  const slug = req.params.slug;
+  console.log(req.params);
+  const blog = await Blog.findOne({
+    where: { slug: slug },
+  });
+  if (!blog) {
+    return next(new AppError("Blog not Found with that slug!", 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "blog found successfully ",
+    result: blog,
+  });
+});
+
 export const updateBlog = CatchAsync(async (req, res, next) => {
   let blogImageUrl;
   let sectionImageUrls = [];
   let sectionData = [];
   if (req.files && req.files.blogImage && req.files.blogImage[0]) {
-    const blogImageUpload = await cloudinary.uploader.upload(
-      req.files.blogImage[0].path
-    );
-    blogImageUrl = blogImageUpload.secure_url;
+    blogImageUrl = req.files.blogImage[0].filename;
   }
 
   if (req.body.sections && req.files && req.files.sectionImages) {
-    const sectionImageUploads = await Promise.all(
-      req.files.sectionImages.map((file) =>
-        cloudinary.uploader.upload(file.path)
-      )
+    sectionImageUrls = await Promise.all(
+      req.files.sectionImages.map((file) => {
+        return file.filename;
+      })
     );
-    sectionImageUrls = sectionImageUploads.map((upload) => upload.secure_url);
   }
 
   const blogId = req.params.id;
@@ -182,18 +183,17 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
       newBlog,
     });
   } catch (error) {
+    res.status(409).json({ success: false, message: error.message });
     if (blogImageUrl) {
-      const publicId = blogImageUrl.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(publicId);
+      const filesToDelete = [req.files.blogImage[0].filename];
+      await deleteFiles(filesToDelete);
     }
 
     if (sectionImageUrls.length > 0) {
-      await Promise.all(
-        sectionImageUrls.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
-          return cloudinary.uploader.destroy(publicId);
-        })
-      );
+      const filesToDelete = [
+        ...req.files.sectionImages.map((file) => file.filename),
+      ];
+      await deleteFiles(filesToDelete);
     }
 
     res.status(500).json({

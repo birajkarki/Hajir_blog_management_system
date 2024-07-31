@@ -1,15 +1,14 @@
 import Highlight from "../models/highlight.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
-import cloudinary from "cloudinary";
 export const createHighlight = CatchAsync(async (req, res, next) => {
   const { blogId } = req.obj;
-  const sectionImageUploads = await Promise.all(
-    req.files.map((file) => cloudinary.uploader.upload(file.path))
+  res.json({ files: req.files });
+  const imageUrls = await Promise.all(
+    req.files.map((file) => {
+      return file.filename;
+    })
   );
-  const imageUrls = sectionImageUploads.map((upload) => upload.secure_url);
-  //   console.log(imageUrls);
-  //   console.log(req.body);
   let { highlightTitle, highlightDescription, highlightSections } = req.body;
   highlightSections = JSON.parse(highlightSections);
   let sectionData;
@@ -31,20 +30,20 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
       highlightSections,
       blogId,
     });
+    highlight.highlightSections = highlight.highlightSections.map((section) => {
+      section.image = `${req.protocol}://${req.get("host")}/uploads/${
+        section.image
+      }`;
+      return section;
+    });
     res.status(201).json({
       success: true,
       message: "Highlight created successfully",
       highlight,
     });
   } catch (error) {
-    if (imageUrls.length > 0) {
-      await Promise.all(
-        imageUrls.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
-          return cloudinary.uploader.destroy(publicId);
-        })
-      );
-    }
+    const filesToDelete = [req.files.map((file) => file.filename)];
+    await deleteFiles(filesToDelete);
     res.status(409).json({
       success: false,
       message: error.message,
@@ -72,17 +71,17 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
   try {
     // Check if new images are provided
     if (
+      req.body.highlightSections &&
       req.files &&
-      req.files.highlightSectionImages &&
-      req.files.highlightSectionImages.length > 0
+      req.files.highlightSectionImages
     ) {
-      const sectionImageUploads = await Promise.all(
-        req.files.map((file) => cloudinary.uploader.upload(file.path))
+      imageUrls = await Promise.all(
+        req.files.highlightSectionImages.map((file) => {
+          return file.filename;
+        })
       );
-      imageUrls = sectionImageUploads.map((upload) => upload.secure_url);
     }
-
-    // Retrieve the existing highlight
+    //   // Retrieve the existing highlight
     const existingHighlight = await Highlight.findOne({ where: { blogId } });
     if (!existingHighlight) {
       return res.status(404).json({
@@ -136,16 +135,12 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
     });
   } catch (error) {
     if (imageUrls.length > 0) {
-      await Promise.all(
-        imageUrls.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
-          return cloudinary.uploader.destroy(publicId);
-        })
-      );
+      const filesToDelete = [req.files.map((file) => file.filename)];
+      await deleteFiles(filesToDelete);
     }
 
     console.error("Error updating highlight:", error);
-    res.status(500).json({
+    res.status(409).json({
       success: false,
       message: error.message,
     });

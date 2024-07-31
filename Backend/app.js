@@ -2,7 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
+import path from "path";
+import { fileURLToPath } from "url";
 import userRoute from "./routes/user.route.js";
 import templateRoute from "./routes/template.route.js";
 import subCategoryRoute from "./routes/subcategory.route.js";
@@ -21,7 +22,14 @@ const app = express();
 // MIDDLEWARES
 app.use(
   cors({
-    origin: true, // Allow all origins
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://backendhajir-blogmanagement.onrender.com",
+      "https://hajir-blog-management-system-f5gh.vercel.app",
+      "https://hajir-website.vercel.app",
+      "https://hajir-blog-management-system.vercel.app",
+    ],
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     credentials: true,
   })
@@ -30,7 +38,9 @@ app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("./public"));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // ROUTES
 app.use("/api/v1/user", userRoute);

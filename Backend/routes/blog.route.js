@@ -5,6 +5,7 @@ import {
   deleteBlog,
   deleteSection,
   getAllBlogs,
+  getBlogBySlug,
   getBlogID,
   rejectBlog,
   updateBlog,
@@ -24,7 +25,6 @@ router
   .route("/")
   .get(getAllBlogs)
   .post(
-
     protect,
     upload.fields([
       { name: "blogImage", maxCount: 1 },
@@ -32,8 +32,6 @@ router
     ]),
     createBlog
   );
-
-
 
 router
   .route("/:id")
@@ -50,4 +48,5 @@ router
 router.route("/section/:id").delete(protect, deleteSection);
 router.route("/approve/:id").put(protect, checkRole, approveBlog);
 router.route("/reject/:id").put(protect, checkRole, rejectBlog);
+router.route("/slug/:slug").get(getBlogBySlug);
 export default router;
