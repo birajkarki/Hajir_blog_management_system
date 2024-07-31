@@ -22,14 +22,15 @@ const app = express();
 // MIDDLEWARES
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      "https://backendhajir-blogmanagement.onrender.com",
-      "https://hajir-blog-management-system-f5gh.vercel.app",
-      "https://hajir-website.vercel.app",
-      "https://hajir-blog-management-system.vercel.app",
-    ],
+    origin: true,
+    // origin: [
+    //   "http://localhost:5173",
+    //   "http://localhost:3000",
+    //   "https://backendhajir-blogmanagement.onrender.com",
+    //   "https://hajir-blog-management-system-f5gh.vercel.app",
+    //   "https://hajir-website.vercel.app",
+    //   "https://hajir-blog-management-system.vercel.app",
+    // ],
     methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
     credentials: true,
   })

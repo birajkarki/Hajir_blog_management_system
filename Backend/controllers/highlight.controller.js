@@ -1,6 +1,7 @@
 import Highlight from "../models/highlight.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
+import { deleteFiles } from "../utils/deleteFiles.js";
 export const createHighlight = CatchAsync(async (req, res, next) => {
   const { blogId } = req.obj;
 
