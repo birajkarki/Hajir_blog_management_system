@@ -174,7 +174,9 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   existingBlog.blogImageCaption = req.body.blogImageCaption
     ? req.body.blogImageCaption
     : existingBlog.blogImageCaption;
-  existingBlog.blogImage = blogImageUrl ? blogImageUrl : existingBlog.blogImage;
+  existingBlog.blogImage = blogImageUrl
+    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
+    : existingBlog.blogImage;
 
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
@@ -196,7 +198,9 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
             req.files.sectionImages.length > 0 &&
             sectionImageUrls[i]
           ) {
-            existingSection.image = sectionImageUrls[i];
+            existingSection.image = `${req.protocol}://${req.get(
+              "host"
+            )}/uploads/${sectionImageUrls[i]}`;
           }
         }
       });
