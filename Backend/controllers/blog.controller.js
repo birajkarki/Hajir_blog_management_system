@@ -122,9 +122,7 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   let sectionImageUrls = [];
   let sectionData = [];
   if (req.files && req.files.blogImage && req.files.blogImage[0]) {
-    blogImageUrl = `${req.protocol}://${req.get("host")}/uploads/${
-      req.files.blogImage[0].filename
-    }`;
+    blogImageUrl = req.files.blogImage[0].filename;
   }
 
   if (req.body.sections && req.files && req.files.sectionImages) {
