@@ -122,7 +122,9 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   let sectionImageUrls = [];
   let sectionData = [];
   if (req.files && req.files.blogImage && req.files.blogImage[0]) {
-    blogImageUrl = req.files.blogImage[0].filename;
+    blogImageUrl = `${req.protocol}://${req.get("host")}/uploads/${
+      req.files.blogImage[0].filename
+    }`;
   }
 
   if (req.body.sections && req.files && req.files.sectionImages) {
@@ -174,6 +176,9 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   existingBlog.blogImageCaption = req.body.blogImageCaption
     ? req.body.blogImageCaption
     : existingBlog.blogImageCaption;
+  existingBlog.blogImage = blogImageUrl
+    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
+    : existingBlog.blogImage;
 
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
@@ -208,12 +213,13 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     ? sectionData
     : existingBlog.sections;
   try {
-    const newBlog = await existingBlog.save();
+    // const newBlog = await existingBlog.save();
 
     res.json({
       success: true,
       message: "Blog updated successfully",
-      newBlog,
+      existingBlog,
+      // newBlog,
     });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });
