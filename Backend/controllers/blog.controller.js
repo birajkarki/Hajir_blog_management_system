@@ -1,20 +1,15 @@
 import Blog from "../models/blog.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
-import cloudinary from "cloudinary";
+import { deleteFiles } from "../utils/deleteFiles.js";
 
 export const createBlog = CatchAsync(async (req, res, next) => {
-  const blogImageUpload = await cloudinary.uploader.upload(
-    req.files.blogImage[0].path
+  const blogImageUrl = req.files.blogImage[0].filename;
+  const sectionImageUrls = await Promise.all(
+    req.files.sectionImages.map((file) => {
+      return file.filename;
+    })
   );
-  const blogImageUrl = blogImageUpload.secure_url;
-  const sectionImageUploads = await Promise.all(
-    req.files.sectionImages.map((file) => cloudinary.uploader.upload(file.path))
-  );
-  const sectionImageUrls = sectionImageUploads.map(
-    (upload) => upload.secure_url
-  );
-
   const blog = {
     blogName: req.body.blogName,
     blogDescription: req.body.blogDescription,
@@ -24,49 +19,56 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     titleTag: req.body.titleTag,
     ...req.obj,
     status: "draft",
-    slug: req.body.slug,
-    blogImage: blogImageUrl,
+    slug: req.body.slug.replace(/\s+/g, "-").toLowerCase(),
+    blogImage: `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`,
     sections: req.body.sections,
+    blogImageAltText: req.body.blogImageAltText,
+    blogImageDescription: req.body.blogImageDescription,
+    blogImageCaption: req.body.blogImageCaption,
   };
   const sections = JSON.parse(blog.sections);
   if (!sections) {
     return next(new AppError("Section cannot be empty!", 404));
   }
-
   const sectionsData = sections.map((value, i) => {
     if (i !== sections.length) {
-      const { name, text } = value;
-      const image = sectionImageUrls[i];
+      const {
+        name,
+        text,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      } = value;
+      const image = `${req.protocol}://${req.get("host")}/uploads/${
+        sectionImageUrls[i]
+      }`;
       const id = i + 1;
-      return { id, name, text, image };
+      return {
+        id,
+        name,
+        text,
+        image,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      };
     }
   });
   blog.sections = sectionsData;
   try {
-    const _blog = await Blog.create(blog);
+    const _newBlog = await Blog.create(blog);
     res.status(201).json({
       success: true,
       message: "Blog Created Successfully",
-      blog: _blog,
+      blog: _newBlog,
     });
   } catch (error) {
-    if (blogImageUrl) {
-      const publicId = blogImageUrl.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(publicId);
-    }
-
-    if (sectionImageUrls.length > 0) {
-      await Promise.all(
-        sectionImageUrls.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
-          return cloudinary.uploader.destroy(publicId);
-        })
-      );
-    }
-    res.status(409).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(409).json({ success: false, message: error.message });
+    const filesToDelete = [
+      req.files.blogImage[0].filename,
+      ...req.files.sectionImages.map((file) => file.filename),
+    ];
+    await deleteFiles(filesToDelete);
   }
 });
 
@@ -98,26 +100,37 @@ export const getBlogID = CatchAsync(async (req, res, next) => {
   });
 });
 
+export const getBlogBySlug = CatchAsync(async (req, res, next) => {
+  const slug = req.params.slug;
+  console.log(req.params);
+  const blog = await Blog.findOne({
+    where: { slug: slug },
+  });
+  if (!blog) {
+    return next(new AppError("Blog not Found with that slug!", 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "blog found successfully ",
+    result: blog,
+  });
+});
+
 export const updateBlog = CatchAsync(async (req, res, next) => {
   let blogImageUrl;
   let sectionImageUrls = [];
   let sectionData = [];
   if (req.files && req.files.blogImage && req.files.blogImage[0]) {
-    const blogImageUpload = await cloudinary.uploader.upload(
-      req.files.blogImage[0].path
-    );
-    blogImageUrl = blogImageUpload.secure_url;
+    blogImageUrl = req.files.blogImage[0].filename;
   }
 
   if (req.body.sections && req.files && req.files.sectionImages) {
-    const sectionImageUploads = await Promise.all(
-      req.files.sectionImages.map((file) =>
-        cloudinary.uploader.upload(file.path)
-      )
+    sectionImageUrls = await Promise.all(
+      req.files.sectionImages.map((file) => {
+        return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+      })
     );
-    sectionImageUrls = sectionImageUploads.map((upload) => upload.secure_url);
   }
-
   const blogId = req.params.id;
   const existingBlog = await Blog.findByPk(blogId);
   if (!existingBlog) {
@@ -139,28 +152,52 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     ? req.body.blogDescription
     : existingBlog.blogDescription;
   existingBlog.slug = req.body.slug ? req.body.slug : existingBlog.slug;
-  existingBlog.blogImage = blogImageUrl ? blogImageUrl : existingBlog.blogImage;
+  existingBlog.blogImage = blogImageUrl
+    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
+    : existingBlog.blogImage;
+  existingBlog.blogImageAltText = req.body.blogImageAltText
+    ? req.body.blogImageAltText
+    : existingBlog.blogImageAltText;
+  existingBlog.blogImageDescription = req.body.blogImageDescription
+    ? req.body.blogImageDescription
+    : existingBlog.blogImageDescription;
+  existingBlog.blogImageCaption = req.body.blogImageCaption
+    ? req.body.blogImageCaption
+    : existingBlog.blogImageCaption;
 
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
     sectionData = JSON.parse(existingBlog.sections).map((section) => {
       let existingSection = section;
       const id = existingSection.id;
-
       newSections.forEach((newSection, i) => {
         if (id === newSection.id) {
+          console.log(id, newSection.id);
           existingSection.name = newSection.name
             ? newSection.name
             : existingSection.name;
           existingSection.text = newSection.text
             ? newSection.text
             : existingSection.text;
+          existingSection.sectionImageAltText = newSection.sectionImageAltText
+            ? newSection.sectionImageAltText
+            : existingSection.sectionImageAltText;
+          existingSection.sectionImageDescription =
+            newSection.sectionImageDescription
+              ? newSection.sectionImageDescription
+              : existingSection.sectionImageDescription;
+          existingSection.sectionImageCaption = newSection.sectionImageCaption
+            ? newSection.sectionImageCaption
+            : existingSection.sectionImageCaption;
 
+          // console.log(sectionImageUrls[i+1]);
           if (
             req.files.sectionImages &&
             req.files.sectionImages.length > 0 &&
             sectionImageUrls[i]
           ) {
+            // existingSection.image = sectionImageUrls[i];
+            console.log(sectionImageUrls);
             existingSection.image = sectionImageUrls[i];
           }
         }
@@ -182,18 +219,17 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
       newBlog,
     });
   } catch (error) {
+    res.status(409).json({ success: false, message: error.message });
     if (blogImageUrl) {
-      const publicId = blogImageUrl.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(publicId);
+      const filesToDelete = [req.files.blogImage[0].filename];
+      await deleteFiles(filesToDelete);
     }
 
     if (sectionImageUrls.length > 0) {
-      await Promise.all(
-        sectionImageUrls.map((url) => {
-          const publicId = url.split("/").pop().split(".")[0];
-          return cloudinary.uploader.destroy(publicId);
-        })
-      );
+      const filesToDelete = [
+        ...req.files.sectionImages.map((file) => file.filename),
+      ];
+      await deleteFiles(filesToDelete);
     }
 
     res.status(500).json({

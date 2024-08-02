@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   createHighlight,
-  getHighlights,
+  getHighlights, 
   updateHighlight,
 } from "../controllers/highlight.controller.js";
 import upload from "../middlewares/uploadFile.js";
@@ -18,3 +18,4 @@ router
     updateHighlight
   );
 export default router;
+

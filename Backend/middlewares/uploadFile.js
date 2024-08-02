@@ -8,7 +8,7 @@ let limit = {
 
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let staticFolder = "./public";
+    let staticFolder = "./public/uploads";
 
     cb(null, staticFolder);
   },
@@ -20,14 +20,7 @@ let storage = multer.diskStorage({
 });
 
 let fileFilter = (req, file, cb) => {
-  let validExtensions = [
-    ".jpeg",
-    ".JPEG",
-    ".png",
-    ".PNG",
-    ".WebP",
-    ".WEBP",
-  ];
+  let validExtensions = [".jpeg", ".JPEG", ".png", ".PNG", ".WebP", ".WEBP"];
 
   let originalName = file.originalname;
   let originalExtension = path.extname(originalName); //note path module is inbuilt module(package) of node js (ie no need to install path package)

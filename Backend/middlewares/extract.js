@@ -6,6 +6,7 @@ const extractObj = (req, res, next) => {
     obj[key] = paramObj[key];
   }
   req.obj = obj;
+  console.log(obj);
   next();
 };
 

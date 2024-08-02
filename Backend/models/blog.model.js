@@ -15,6 +15,10 @@ const Blog = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    canonicalTag: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     blogName: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -28,11 +32,23 @@ const Blog = sequelize.define(
       allowNull: false,
     },
     blogImage: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    blogImageAltText: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    blogImageDescription: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    blogImageCaption: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     titleDescription: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     slug: {
