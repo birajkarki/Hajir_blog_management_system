@@ -20,11 +20,12 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     ...req.obj,
     status: "draft",
     slug: req.body.slug.replace(/\s+/g, "-").toLowerCase(),
-    blogImage: `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`,
+    blogImage: blogImageUrl,
     sections: req.body.sections,
     blogImageAltText: req.body.blogImageAltText,
     blogImageDescription: req.body.blogImageDescription,
     blogImageCaption: req.body.blogImageCaption,
+    canonicalTag: req.body.canonicalTag,
   };
   const sections = JSON.parse(blog.sections);
   if (!sections) {
@@ -127,10 +128,11 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   if (req.body.sections && req.files && req.files.sectionImages) {
     sectionImageUrls = await Promise.all(
       req.files.sectionImages.map((file) => {
-        return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+        return file.filename;
       })
     );
   }
+
   const blogId = req.params.id;
   const existingBlog = await Blog.findByPk(blogId);
   if (!existingBlog) {
@@ -141,20 +143,28 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   }
 
   // Update existing blog properties
-  existingBlog.title = req.body.title ? req.body.title : existingBlog.blogName;
-  existingBlog.content = req.body.content
-    ? req.body.content
-    : existingBlog.blogName;
   existingBlog.blogName = req.body.blogName
     ? req.body.blogName
     : existingBlog.blogName;
   existingBlog.blogDescription = req.body.blogDescription
     ? req.body.blogDescription
     : existingBlog.blogDescription;
+  existingBlog.blogTitle = req.body.blogTitle
+    ? req.body.blogTitle
+    : existingBlog.blogTitle;
+  existingBlog.titleDescription = req.body.titleDescription
+    ? req.body.titleDescription
+    : existingBlog.titleDescription;
   existingBlog.slug = req.body.slug ? req.body.slug : existingBlog.slug;
-  existingBlog.blogImage = blogImageUrl
-    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
-    : existingBlog.blogImage;
+  existingBlog.titleTag = req.body.titleTag
+    ? req.body.titleTag
+    : existingBlog.titleTag;
+  existingBlog.metaTag = req.body.metaTag
+    ? req.body.metaTag
+    : existingBlog.metaTag;
+  existingBlog.canonicalTag = req.body.canonicalTag
+    ? req.body.canonicalTag
+    : existingBlog.canonicalTag;
   existingBlog.blogImageAltText = req.body.blogImageAltText
     ? req.body.blogImageAltText
     : existingBlog.blogImageAltText;
@@ -170,34 +180,21 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     sectionData = JSON.parse(existingBlog.sections).map((section) => {
       let existingSection = section;
       const id = existingSection.id;
+
       newSections.forEach((newSection, i) => {
         if (id === newSection.id) {
-          console.log(id, newSection.id);
           existingSection.name = newSection.name
             ? newSection.name
             : existingSection.name;
           existingSection.text = newSection.text
             ? newSection.text
             : existingSection.text;
-          existingSection.sectionImageAltText = newSection.sectionImageAltText
-            ? newSection.sectionImageAltText
-            : existingSection.sectionImageAltText;
-          existingSection.sectionImageDescription =
-            newSection.sectionImageDescription
-              ? newSection.sectionImageDescription
-              : existingSection.sectionImageDescription;
-          existingSection.sectionImageCaption = newSection.sectionImageCaption
-            ? newSection.sectionImageCaption
-            : existingSection.sectionImageCaption;
 
-          // console.log(sectionImageUrls[i+1]);
           if (
             req.files.sectionImages &&
             req.files.sectionImages.length > 0 &&
             sectionImageUrls[i]
           ) {
-            // existingSection.image = sectionImageUrls[i];
-            console.log(sectionImageUrls);
             existingSection.image = sectionImageUrls[i];
           }
         }
