@@ -176,9 +176,7 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   existingBlog.blogImageCaption = req.body.blogImageCaption
     ? req.body.blogImageCaption
     : existingBlog.blogImageCaption;
-  existingBlog.blogImage = blogImageUrl
-    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
-    : existingBlog.blogImage;
+  existingBlog.blogImage = blogImageUrl ? blogImageUrl : existingBlog.blogImage;
 
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
@@ -213,13 +211,13 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     ? sectionData
     : existingBlog.sections;
   try {
-    // const newBlog = await existingBlog.save();
+    const newBlog = await existingBlog.save();
 
     res.json({
       success: true,
       message: "Blog updated successfully",
-      existingBlog,
-      // newBlog,
+      // existingBlog,
+      newBlog,
     });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });
