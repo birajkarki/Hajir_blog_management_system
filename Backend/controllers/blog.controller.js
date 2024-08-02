@@ -20,7 +20,9 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     ...req.obj,
     status: "draft",
     slug: req.body.slug.replace(/\s+/g, "-").toLowerCase(),
-    blogImage: blogImageUrl,
+    blogImageUrl: `${req.protocol}}://${req.get(
+      "host"
+    )}/uploads/${blogImageUrl}`,
     sections: req.body.sections,
     blogImageAltText: req.body.blogImageAltText,
     blogImageDescription: req.body.blogImageDescription,
