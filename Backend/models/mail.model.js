@@ -13,7 +13,7 @@ const Mail = sequelize.define(
       allowNull: false,
     },
     phone: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
     },
     message: {
       type: DataTypes.TEXT,
