@@ -1,15 +1,20 @@
 import { Sequelize } from "sequelize";
 
-export const sequelize = new Sequelize(
-  "hajir_blog",
-  "staging_hajir",
-  "velox@123",
-  {
-    host: "92.60.36.17",
-    dialect: "mysql",
-    logging: console.log,
-  }
-);
+// export const sequelize = new Sequelize(
+//   "hajir_blog",
+//   "staging_hajir",
+//   "velox@123",
+//   {
+//     host: "92.60.36.17",
+//     dialect: "mysql",
+//     logging: console.log,
+//   }
+// );
+export const sequelize = new Sequelize("blog", "root", "", {
+  host: "localhost",
+  dialect: "mysql",
+  logging: false,
+});
 
 export const connectToDb = async () => {
   try {

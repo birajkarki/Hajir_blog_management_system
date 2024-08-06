@@ -3,7 +3,7 @@ import path from "path";
 import AppError from "../utils/AppError.js";
 
 let limit = {
-  fileSize: 1024 * 5, //5KB
+  fileSize: 1024 * 200, //200KB
 };
 
 let storage = multer.diskStorage({

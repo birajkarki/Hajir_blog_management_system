@@ -74,9 +74,10 @@ export const createBlog = CatchAsync(async (req, res, next) => {
 });
 
 export const getAllBlogs = CatchAsync(async (req, res, next) => {
-  const { templateId, categoryId = null, subcategoryId } = req.obj;
+  const { status } = req.query;
+  const queryString = status ? { status } : {};
   let blogs = await Blog.findAll({
-    where: { templateId, categoryId, subcategoryId },
+    where: queryString,
   });
   res.status(200).json({
     success: true,
@@ -155,7 +156,9 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   existingBlog.titleDescription = req.body.titleDescription
     ? req.body.titleDescription
     : existingBlog.titleDescription;
-  existingBlog.slug = req.body.slug ? req.body.slug : existingBlog.slug;
+  existingBlog.slug = req.body.slug
+    ? req.body.slug.replace(/\s+/g, "-").toLowerCase()
+    : existingBlog.slug;
   existingBlog.titleTag = req.body.titleTag
     ? req.body.titleTag
     : existingBlog.titleTag;
@@ -301,7 +304,7 @@ export const rejectBlog = CatchAsync(async (req, res, next) => {
   if (!blog) {
     return next(new AppError("Blog not found!", 404));
   }
-  blog.status = "rejected";
+  blog.status = "draft";
 
   await blog.save();
   res.status(200).json({

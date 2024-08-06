@@ -46,7 +46,7 @@ router
   )
   .delete(deleteBlog);
 router.route("/section/:id").delete(protect, deleteSection);
-router.route("/approve/:id").put(protect, checkRole, approveBlog);
+router.route("/approve/:id").put(protect, approveBlog);
 router.route("/reject/:id").put(protect, checkRole, rejectBlog);
 router.route("/slug/:slug").get(getBlogBySlug);
 export default router;
