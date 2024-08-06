@@ -7,7 +7,7 @@ export const sequelize = new Sequelize(
   {
     host: "92.60.36.17",
     dialect: "mysql",
-    logging: console.log,
+    logging: false,
   }
 );
 // export const sequelize = new Sequelize("blog", "root", "", {

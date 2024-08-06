@@ -74,14 +74,35 @@ export const createBlog = CatchAsync(async (req, res, next) => {
 });
 
 export const getAllBlogs = CatchAsync(async (req, res, next) => {
+  const { templateId, categoryId = null, subcategoryId } = req.obj;
   const { status } = req.query;
-  const queryString = status ? { status } : {};
+
+  let queryString = {};
+
+  if (status) {
+    queryString.status = status;
+  }
+
+  if (templateId) {
+    queryString.templateId = templateId;
+  }
+
+  if (categoryId) {
+    queryString.categoryId = categoryId;
+  }
+
+  if (subcategoryId) {
+    queryString.subcategoryId = subcategoryId;
+  }
+
   let blogs = await Blog.findAll({
     where: queryString,
   });
+
   res.status(200).json({
     success: true,
-    message: "blogs read successfully",
+    result: blogs.length,
+    message: "Blogs read successfully",
     blogs: blogs,
   });
 });
