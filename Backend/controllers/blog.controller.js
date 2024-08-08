@@ -1,15 +1,13 @@
 import Blog from "../models/blog.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
+import { constructImageUrl } from "../utils/constructImageUrl.js";
 import { deleteFiles } from "../utils/deleteFiles.js";
 
 export const createBlog = CatchAsync(async (req, res, next) => {
   const blogImageUrl = req.files.blogImage[0].filename;
-  const sectionImageUrls = await Promise.all(
-    req.files.sectionImages.map((file) => {
-      return file.filename;
-    })
-  );
+  const sectionImageUrls = req.files.sectionImages.map((file) => file.filename);
+
   const blog = {
     blogName: req.body.blogName,
     blogDescription: req.body.blogDescription,
@@ -20,17 +18,19 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     ...req.obj,
     status: "draft",
     slug: req.body.slug.replace(/\s+/g, "-").toLowerCase(),
-    blogImage: `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`,
+    blogImage: blogImageUrl,
     sections: req.body.sections,
     blogImageAltText: req.body.blogImageAltText,
     blogImageDescription: req.body.blogImageDescription,
     blogImageCaption: req.body.blogImageCaption,
     canonicalTag: req.body.canonicalTag,
   };
+
   const sections = JSON.parse(blog.sections);
   if (!sections) {
     return next(new AppError("Section cannot be empty!", 404));
   }
+
   const sectionsData = sections.map((value, i) => {
     if (i !== sections.length) {
       const {
@@ -40,9 +40,7 @@ export const createBlog = CatchAsync(async (req, res, next) => {
         sectionImageDescription,
         sectionImageCaption,
       } = value;
-      const image = `${req.protocol}://${req.get("host")}/uploads/${
-        sectionImageUrls[i]
-      }`;
+      const image = sectionImageUrls[i];
       const id = i + 1;
       return {
         id,
@@ -56,12 +54,39 @@ export const createBlog = CatchAsync(async (req, res, next) => {
     }
   });
   blog.sections = sectionsData;
+
   try {
-    const _newBlog = await Blog.create(blog);
+    const newBlog = await Blog.create(blog);
+
+    // Apply host and URL to blog image
+    newBlog.blogImage = constructImageUrl(req, blogImageUrl);
+
+    // Apply host and URL to section images
+    newBlog.sections = sectionsData.map((section) => {
+      const {
+        id,
+        name,
+        text,
+        image,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      } = section;
+      return {
+        id,
+        name,
+        text,
+        image: constructImageUrl(req, image),
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      };
+    });
+
     res.status(201).json({
       success: true,
-      message: "Blog Created Successfully",
-      blog: _newBlog,
+      message: "Blog Updated Successfully",
+      blog: newBlog,
     });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });
@@ -98,28 +123,78 @@ export const getAllBlogs = CatchAsync(async (req, res, next) => {
   let blogs = await Blog.findAll({
     where: queryString,
   });
-
-  res.status(200).json({
+  const newBlogs = blogs.map((blog) => {
+    blog.blogImage = constructImageUrl(req, blog.blogImage);
+    blog.sections = JSON.parse(blog.sections).map((section) => {
+      const {
+        id,
+        name,
+        text,
+        image,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      } = section;
+      return {
+        id,
+        name,
+        text,
+        image: constructImageUrl(req, image),
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      };
+    });
+    blog.sections = JSON.stringify(blog.sections);
+    return blog;
+  });
+  res.json({
     success: true,
-    result: blogs.length,
+    result: newBlogs.length,
     message: "Blogs read successfully",
-    blogs: blogs,
+    blogs: newBlogs,
   });
 });
 
 export const getBlogID = CatchAsync(async (req, res, next) => {
-  const { templateId, categoryId = null, subcategoryId } = req.obj;
   const blogId = req.params.id;
+
   const blog = await Blog.findOne({
     where: { id: blogId },
   });
+
   if (!blog) {
     return next(new AppError("Blog not Found with that ID!", 404));
   }
-  res.status(200).json({
+
+  blog.blogImage = constructImageUrl(req, blog.blogImage);
+
+  // Apply host and URL to section images
+  blog.sections = JSON.parse(blog.sections).map((section) => {
+    const {
+      id,
+      name,
+      text,
+      image,
+      sectionImageAltText,
+      sectionImageDescription,
+      sectionImageCaption,
+    } = section;
+    return {
+      id,
+      name,
+      text,
+      image: constructImageUrl(req, image),
+      sectionImageAltText,
+      sectionImageDescription,
+      sectionImageCaption,
+    };
+  });
+  blog.sections = JSON.stringify(blog.sections);
+  res.status(201).json({
     success: true,
-    message: "blog found successfully ",
-    result: blog,
+    message: "Blog Updated Successfully",
+    blog: blog,
   });
 });
 
@@ -132,10 +207,34 @@ export const getBlogBySlug = CatchAsync(async (req, res, next) => {
   if (!blog) {
     return next(new AppError("Blog not Found with that slug!", 404));
   }
-  res.status(200).json({
+  blog.blogImage = constructImageUrl(req, blog.blogImage);
+
+  // Apply host and URL to section images
+  blog.sections = JSON.parse(blog.sections).map((section) => {
+    const {
+      id,
+      name,
+      text,
+      image,
+      sectionImageAltText,
+      sectionImageDescription,
+      sectionImageCaption,
+    } = section;
+    return {
+      id,
+      name,
+      text,
+      image: constructImageUrl(req, image),
+      sectionImageAltText,
+      sectionImageDescription,
+      sectionImageCaption,
+    };
+  });
+  blog.sections = JSON.stringify(blog.sections);
+  res.status(201).json({
     success: true,
-    message: "blog found successfully ",
-    result: blog,
+    message: "Blog Updated Successfully",
+    blog: blog,
   });
 });
 
@@ -177,9 +276,7 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   existingBlog.titleDescription = req.body.titleDescription
     ? req.body.titleDescription
     : existingBlog.titleDescription;
-  existingBlog.slug = req.body.slug
-    ? req.body.slug.replace(/\s+/g, "-").toLowerCase()
-    : existingBlog.slug;
+  existingBlog.slug = req.body.slug ? req.body.slug : existingBlog.slug;
   existingBlog.titleTag = req.body.titleTag
     ? req.body.titleTag
     : existingBlog.titleTag;
@@ -198,9 +295,7 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
   existingBlog.blogImageCaption = req.body.blogImageCaption
     ? req.body.blogImageCaption
     : existingBlog.blogImageCaption;
-  existingBlog.blogImage = blogImageUrl
-    ? `${req.protocol}://${req.get("host")}/uploads/${blogImageUrl}`
-    : existingBlog.blogImage;
+  existingBlog.blogImage = blogImageUrl ? blogImageUrl : existingBlog.blogImage;
 
   if (req.body.sections) {
     const newSections = JSON.parse(req.body.sections);
@@ -216,15 +311,22 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
           existingSection.text = newSection.text
             ? newSection.text
             : existingSection.text;
-
+          existingSection.sectionImageAltText = newSection.sectionImageAltText
+            ? newSection.sectionImageAltText
+            : existingSection.sectionImageAltText;
+          existingSection.sectionImageDescription =
+            newSection.sectionImageDescription
+              ? newSection.sectionImageDescription
+              : existingSection.sectionImageDescription;
+          existingSection.sectionImageCaption = newSection.sectionImageCaption
+            ? newSection.sectionImageCaption
+            : existingSection.sectionImageCaption;
           if (
             req.files.sectionImages &&
             req.files.sectionImages.length > 0 &&
             sectionImageUrls[i]
           ) {
-            existingSection.image = `${req.protocol}://${req.get(
-              "host"
-            )}/uploads/${sectionImageUrls[i]}`;
+            existingSection.image = sectionImageUrls[i];
           }
         }
       });
@@ -238,7 +340,29 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
     : existingBlog.sections;
   try {
     const newBlog = await existingBlog.save();
+    newBlog.blogImage = constructImageUrl(req, blogImageUrl);
 
+    // Apply host and URL to section images
+    newBlog.sections = sectionData.map((section) => {
+      const {
+        id,
+        name,
+        text,
+        image,
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      } = section;
+      return {
+        id,
+        name,
+        text,
+        image: constructImageUrl(req, image),
+        sectionImageAltText,
+        sectionImageDescription,
+        sectionImageCaption,
+      };
+    });
     res.json({
       success: true,
       message: "Blog updated successfully",
@@ -316,7 +440,6 @@ export const approveBlog = CatchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Blog approved successfully",
-    blog,
   });
 });
 
@@ -325,12 +448,11 @@ export const rejectBlog = CatchAsync(async (req, res, next) => {
   if (!blog) {
     return next(new AppError("Blog not found!", 404));
   }
-  blog.status = "draft";
+  blog.status = "rejected";
 
   await blog.save();
   res.status(200).json({
     success: true,
     message: "Blog rejected successfully",
-    blog,
   });
 });

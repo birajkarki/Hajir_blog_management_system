@@ -1,21 +1,23 @@
 import Highlight from "../models/highlight.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
+import { constructImageUrl } from "../utils/constructImageUrl.js";
 import { deleteFiles } from "../utils/deleteFiles.js";
+
 export const createHighlight = CatchAsync(async (req, res, next) => {
   const { blogId } = req.obj;
 
-  const imageUrls = await Promise.all(
-    req.files.map((file) => {
-      return file.filename;
-    })
-  );
+  // Extract filenames from uploaded files
+  const imageUrls = req.files.map((file) => file.filename);
+
   let { highlightTitle, highlightDescription, highlightSections } = req.body;
   highlightSections = JSON.parse(highlightSections);
   let sectionData;
+
   if (!highlightSections) {
     return next(new AppError("Highlight sections cannot be empty"), 404);
   }
+
   sectionData = highlightSections.map((value, i) => {
     const {
       title,
@@ -24,9 +26,8 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
       highlightImageDescription,
       highlightImageCaption,
     } = value;
-    const image = `${req.protocol}://${req.get("host")}/uploads/${
-      imageUrls[i]
-    }`;
+
+    const image = imageUrls[i];
     const id = i + 1;
     return {
       id,
@@ -38,22 +39,34 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
       highlightImageCaption,
     };
   });
-  highlightSections = sectionData;
+
   try {
     const highlight = await Highlight.create({
       highlightTitle,
       highlightDescription,
-      highlightSections,
+      highlightSections: sectionData,
       blogId,
     });
+
+    // Construct full image URLs for response
+    const highlightResponse = {
+      ...highlight.toJSON(),
+      highlightSections: sectionData.map((section) => ({
+        ...section,
+        image: constructImageUrl(req, section.image), // Add full URL
+      })),
+    };
+
     res.status(201).json({
       success: true,
       message: "Highlight created successfully",
-      highlight,
+      highlight: highlightResponse,
     });
   } catch (error) {
-    const filesToDelete = [req.files.map((file) => file.filename)];
+    // Clean up any uploaded files in case of error
+    const filesToDelete = req.files.map((file) => file.filename);
     await deleteFiles(filesToDelete);
+
     res.status(409).json({
       success: false,
       message: error.message,
@@ -63,13 +76,23 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
 export const getHighlights = CatchAsync(async (req, res, next) => {
   const { blogId } = req.obj;
   const highlights = await Highlight.findOne({ where: { blogId } });
+
   if (!highlights) {
-    return next(new AppError("Highlight sections cannot be empty"), 404);
+    return next(new AppError("Highlight not found", 404));
   }
+
+  const highlightResponse = {
+    ...highlights.toJSON(),
+    highlightSections: JSON.parse(highlights.highlightSections).map(
+      (section) => ({
+        ...section,
+        image: constructImageUrl(req, section.image),
+      })
+    ),
+  };
   res.status(200).json({
     success: true,
-    message: "Highlight fetched successfully",
-    highlights,
+    highlights: highlightResponse,
   });
 });
 
@@ -77,28 +100,19 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
   const { blogId } = req.obj;
   let imageUrls = [];
   let highlightSectionData = [];
+
   if (
     req.body.highlightSections &&
     req.files &&
     req.files.highlightSectionImages
   ) {
-    imageUrls = await Promise.all(
-      req.files.highlightSectionImages.map((file) => {
-        return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
-      })
-    );
+    imageUrls = req.files.highlightSectionImages.map((file) => file.filename);
   }
 
-  // try {
-  // Check if new images are provided
-
-  //   // Retrieve the existing highlight
+  // Retrieve the existing highlight
   const existingHighlight = await Highlight.findOne({ where: { blogId } });
   if (!existingHighlight) {
-    return res.status(404).json({
-      success: false,
-      message: "Highlight not found",
-    });
+    return next(new AppError("Highlight Not Found ", 404));
   }
 
   existingHighlight.highlightTitle = req.body.highlightTitle
@@ -113,11 +127,9 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
     highlightSectionData = JSON.parse(existingHighlight.highlightSections).map(
       (highlightSection) => {
         let existingHighlightSection = highlightSection;
-        // console.log(existingHighlightSection);
         const id = existingHighlightSection.id;
         newHighlightSections.forEach((newHighlightSection, i) => {
           if (id === newHighlightSection.id) {
-            console.log(newHighlightSection);
             existingHighlightSection.title = newHighlightSection.title
               ? newHighlightSection.title
               : existingHighlightSection.title;
@@ -160,12 +172,17 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Highlight updated successfully",
-      highlight: updatedHighlight,
-      // existingHighlight,
+      highlight: {
+        ...updatedHighlight.toJSON(),
+        highlightSections: highlightSectionData.map((section) => ({
+          ...section,
+          image: constructImageUrl(req, section.image),
+        })),
+      },
     });
   } catch (error) {
     if (imageUrls.length > 0) {
-      const filesToDelete = [req.files.map((file) => file.filename)];
+      const filesToDelete = req.files.map((file) => file.filename);
       await deleteFiles(filesToDelete);
     }
 

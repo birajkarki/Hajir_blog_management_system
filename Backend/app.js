@@ -59,7 +59,6 @@ app.use(
   blogRoute
 );
 app.use("/api/v1/blog", extractObj, blogRoute);
-
 app.use("/api/v1/:templateId/:subcategoryId/blog", extractObj, blogRoute);
 app.use("/api/v1/:blogId/highlight", extractObj, highlightRoute);
 app.use("/api/v1/review", reviewRoute);

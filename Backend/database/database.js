@@ -1,20 +1,16 @@
 import { Sequelize } from "sequelize";
-
+import dotenv from "dotenv";
+dotenv.config({ path: "./.env" });
 export const sequelize = new Sequelize(
-  "hajir_blog",
-  "staging_hajir",
-  "velox@123",
+  process.env.DATABASE_NAME,
+  process.env.DATABASE_USERNAME,
+  process.env.DATABASE_PASSWORD,
   {
-    host: "92.60.36.17",
-    dialect: "mysql",
+    host: process.env.DATABASE_HOST,
+    dialect: process.env.DATABASE_DIALECT,
     logging: false,
   }
 );
-// export const sequelize = new Sequelize("blog", "root", "", {
-//   host: "localhost",
-//   dialect: "mysql",
-//   logging: false,
-// });
 
 export const connectToDb = async () => {
   try {
