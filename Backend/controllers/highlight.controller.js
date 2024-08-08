@@ -7,7 +7,6 @@ import { deleteFiles } from "../utils/deleteFiles.js";
 export const createHighlight = CatchAsync(async (req, res, next) => {
   const { blogId } = req.obj;
 
-  // Extract filenames from uploaded files
   const imageUrls = req.files.map((file) => file.filename);
 
   let { highlightTitle, highlightDescription, highlightSections } = req.body;
@@ -48,6 +47,27 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
       blogId,
     });
 
+    highlight.highlightSections = highlight.highlightSections.map((section) => {
+      const {
+        id,
+        title,
+        image,
+        description,
+        highlightImageAltText,
+        highlightImageDescription,
+        highlightImageCaption,
+      } = section;
+      return {
+        id,
+        title,
+        image: constructImageUrl(req, image),
+        description,
+        highlightImageAltText,
+        highlightImageDescription,
+        highlightImageCaption,
+      };
+    });
+    highlight.highlightSections = JSON.stringify(highlight.highlightSections);
     res.status(201).json({
       success: true,
       message: "Highlight created successfully",
@@ -115,7 +135,7 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
     imageUrls = req.files.highlightSectionImages.map((file) => file.filename);
   }
 
-  // Retrieve the existing highlight
+  // // Retrieve the existing highlight
   const existingHighlight = await Highlight.findOne({ where: { blogId } });
   if (!existingHighlight) {
     return next(new AppError("Highlight Not Found ", 404));
@@ -135,7 +155,7 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
         let existingHighlightSection = highlightSection;
         const id = existingHighlightSection.id;
         newHighlightSections.forEach((newHighlightSection, i) => {
-          if (id === newHighlightSection.id) {
+          if (newHighlightSection.id === id) {
             existingHighlightSection.title = newHighlightSection.title
               ? newHighlightSection.title
               : existingHighlightSection.title;
@@ -157,7 +177,7 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
                 : existingHighlightSection.highlightImageCaption;
             if (
               req.files.highlightSectionImages &&
-              req.files.highlightSectionImages.length > 0 &&
+              req.files.highlightSectionImages &&
               imageUrls[i]
             ) {
               existingHighlightSection.image = imageUrls[i];
@@ -172,13 +192,36 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
   existingHighlight.highlightSections = highlightSectionData.length
     ? highlightSectionData
     : existingHighlight.highlightSections;
-
   try {
-    const updatedHighlight = await existingHighlight.save();
-    res.status(200).json({
+    await existingHighlight.save();
+    existingHighlight.highlightSections =
+      existingHighlight.highlightSections.map((section) => {
+        const {
+          id,
+          title,
+          image,
+          description,
+          highlightImageAltText,
+          highlightImageDescription,
+          highlightImageCaption,
+        } = section;
+        return {
+          id,
+          title,
+          image: constructImageUrl(req, image),
+          description,
+          highlightImageAltText,
+          highlightImageDescription,
+          highlightImageCaption,
+        };
+      });
+    existingHighlight.highlightSections = JSON.stringify(
+      existingHighlight.highlightSections
+    );
+    res.status(201).json({
       success: true,
       message: "Highlight updated successfully",
-      updatedHighlight,
+      existingHighlight,
     });
   } catch (error) {
     if (imageUrls.length > 0) {
