@@ -48,19 +48,10 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
       blogId,
     });
 
-    // Construct full image URLs for response
-    const highlightResponse = {
-      ...highlight,
-      highlightSections: sectionData.map((section) => ({
-        ...section,
-        image: constructImageUrl(req, section.image), // Add full URL
-      })),
-    };
-
     res.status(201).json({
       success: true,
       message: "Highlight created successfully",
-      highlight: highlightResponse,
+      highlight,
     });
   } catch (error) {
     // Clean up any uploaded files in case of error
@@ -81,18 +72,33 @@ export const getHighlights = CatchAsync(async (req, res, next) => {
     return next(new AppError("Highlight not found", 404));
   }
 
-  const highlightResponse = {
-    ...highlights,
-    highlightSections: JSON.parse(highlights.highlightSections).map(
-      (section) => ({
-        ...section,
-        image: constructImageUrl(req, section.image),
-      })
-    ),
-  };
+  highlights.highlightSections = JSON.parse(highlights.highlightSections).map(
+    (section) => {
+      const {
+        id,
+        title,
+        image,
+        description,
+        highlightImageAltText,
+        highlightImageDescription,
+        highlightImageCaption,
+      } = section;
+      return {
+        id,
+        title,
+        image: constructImageUrl(req, image),
+        description,
+        highlightImageAltText,
+        highlightImageDescription,
+        highlightImageCaption,
+      };
+    }
+  );
+  highlights.highlightSections = JSON.stringify(highlights.highlightSections);
   res.status(200).json({
     success: true,
-    highlights: highlightResponse,
+    message: "Highlights fetched successfully",
+    highlights,
   });
 });
 
@@ -172,13 +178,7 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Highlight updated successfully",
-      highlight: {
-        ...updatedHighlight,
-        highlightSections: highlightSectionData.map((section) => ({
-          ...section,
-          image: constructImageUrl(req, section.image),
-        })),
-      },
+      updatedHighlight,
     });
   } catch (error) {
     if (imageUrls.length > 0) {
