@@ -50,7 +50,7 @@ export const createHighlight = CatchAsync(async (req, res, next) => {
 
     // Construct full image URLs for response
     const highlightResponse = {
-      ...highlight.toJSON(),
+      ...highlight,
       highlightSections: sectionData.map((section) => ({
         ...section,
         image: constructImageUrl(req, section.image), // Add full URL
@@ -82,7 +82,7 @@ export const getHighlights = CatchAsync(async (req, res, next) => {
   }
 
   const highlightResponse = {
-    ...highlights.toJSON(),
+    ...highlights,
     highlightSections: JSON.parse(highlights.highlightSections).map(
       (section) => ({
         ...section,
@@ -173,7 +173,7 @@ export const updateHighlight = CatchAsync(async (req, res, next) => {
       success: true,
       message: "Highlight updated successfully",
       highlight: {
-        ...updatedHighlight.toJSON(),
+        ...updatedHighlight,
         highlightSections: highlightSectionData.map((section) => ({
           ...section,
           image: constructImageUrl(req, section.image),

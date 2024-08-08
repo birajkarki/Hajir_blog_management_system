@@ -191,9 +191,9 @@ export const getBlogID = CatchAsync(async (req, res, next) => {
     };
   });
   blog.sections = JSON.stringify(blog.sections);
-  res.status(201).json({
+  res.status(200).json({
     success: true,
-    message: "Blog Updated Successfully",
+    message: "Blog Fetched Successfully",
     blog: blog,
   });
 });
@@ -231,9 +231,9 @@ export const getBlogBySlug = CatchAsync(async (req, res, next) => {
     };
   });
   blog.sections = JSON.stringify(blog.sections);
-  res.status(201).json({
+  res.status(200).json({
     success: true,
-    message: "Blog Updated Successfully",
+    message: "Blog Fetched Successfully",
     blog: blog,
   });
 });
@@ -363,10 +363,9 @@ export const updateBlog = CatchAsync(async (req, res, next) => {
         sectionImageCaption,
       };
     });
-    res.json({
+    res.status(201).json({
       success: true,
       message: "Blog updated successfully",
-      // existingBlog,
       newBlog,
     });
   } catch (error) {
